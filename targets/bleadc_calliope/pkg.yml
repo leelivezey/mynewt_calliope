@@ -1,0 +1,7 @@
+### Package: targets/mydrivertest_calliope
+pkg.name: "targets/bleadc_calliope"
+pkg.type: "target"
+pkg.description: 
+pkg.author: Alfred Schilken
+pkg.homepage: 
+

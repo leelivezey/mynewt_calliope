@@ -1,4 +1,0 @@
-### Target: targets/mydrivertest_repo
-target.app: "@mynewt-de-schilken-microbit/apps/mydrivertest"
-target.bsp: "@mynewt-de-schilken-microbit/hw/bsp/bbc_microbit"
-target.build_profile: "debug"
