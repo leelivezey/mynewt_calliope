@@ -35,12 +35,12 @@ It is widely compatible with the microbit but has an RGB LED, a buzzer, a microp
 
 
 ### There are two apps
-apps/mydrivertest which uses the mynewt shell to issue commands to the drivers
-apps/bleadc which uses adc to read an analog value and publish it as bluetooth characteristic
+* apps/mydrivertest which uses the mynewt shell to issue commands to the drivers
+* apps/bleadc which uses adc to read an analog value and publish it as bluetooth characteristic
 
 ### There are also two targets
-target/mydrivertest_calliope
-target/bleadc_calliope
+* target/mydrivertest_calliope
+* target/bleadc_calliope
 
 ```
 newt target create mydrivertest_calliope
