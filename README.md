@@ -29,7 +29,9 @@ See the excellent documentation at http://mynewt.apache.org/latest/os/introducti
 to install the newt tool, the cross toolchain for ARM 
 and load a bootloader before running one of the apps.
 
-
+If you haven't heard of calliope mini: see https://calliope.cc ( in german )
+Calliope mini is for german pupils what the BBC microbit is in England.
+It is widely compatible with the microbit but has an RGB LED, a buzzer, a microphone and a motor driver chip on board.
 
 
 ### There are two apps
