@@ -17,7 +17,7 @@
 # under the License.
 #
 
-repo.name: mynewt-unofficial
+repo.name: mynewt-calliope
 repo.versions:
     "0.0.0": "master"
 
