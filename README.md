@@ -1,47 +1,67 @@
-# mynewt-de-schilken-microbit
-Experimental apache mynewt bsp and drivers for bbc microbit: button, ssd1306, si1145, led-matrix 
+# mynewt-calliope
+Experimental apache mynewt bsp, drivers and apps for calliope mini: button, oled ssd1306, si1145, led-matrix 
 
 
 ## usage
-### Make the repo available locally in your proeject.yml
+### Make the repo available locally in your project.yml
 ```
 
 project.repositories:
     - apache-mynewt-core
-    - mynewt-de-schilken-microbit
+    - mynewt-de-schilken-calliope
 
-repository.mynewt-de-schilken-microbit:
+repository.mynewt-de-schilken-calliope:
     type: github
     vers: 0-latest
     user: schilken
-    repo: mynewt-de-schilken-microbit
+    repo: mynewt-calliope
 ```
 
+NOTE:
+Before the first start of a mynewt programm on a fresh calliope, I had to do an full erase of the calliope.
+I used "pyocd-flashtool -d debug -t nrf51 -ce"
+
+Maybe a "telnet localhost 4444" to connect to a running openocd 
+and enter "nrf51 mass_erase" could also work.
+
+If you are not (yet:-) used to the mynewt workflow:
+See the excellent documentation at http://mynewt.apache.org/latest/os/introduction/
+to install the newt tool, the cross toolchain for ARM 
+and load a bootloader before running one of the apps.
 
 
-### Create a target
+
+
+### There are two apps
+apps/mydrivertest which uses the mynewt shell to issue commands to the drivers
+apps/bleadc which uses adc to read an analog value and publish it as bluetooth characteristic
+
+### There are also two targets
+target/mydrivertest_calliope
+target/bleadc_calliope
 
 ```
-newt target create mydrivertest_repo
+newt target create mydrivertest_calliope
 newt target set mydrivertest_repo \
-	app=@mynewt-de-schilken-microbit/apps/mydrivertest \
-	bsp=@mynewt-de-schilken-microbit/hw/bsp/bbc_microbit \
+	app=@mynewt-de-schilken-calliope/apps/mydrivertest \
+	bsp=@mynewt-de-schilken-calliope/hw/bsp/calliope_mini \
 	build_profile=debug
-newt target show mydrivertest_repo
+newt target show mydrivertest_calliope
 ```
 
-### build and deploy it to a connected bbc_microbit 
-newt run mydrivertest_repo 0.7.7
+### build and deploy it to a connected calliope 
+newt run mydrivertest_calliope 0.7.7
 
 
 ### Connect a terminal to the usb-uart ( I use CoolTerm on m mac :-)
 
 Try out the commands:
-* write string to microbit 5x5 LED matrix
-* write character to microbit 5x5 LED matrix
+* enter ? to see the commands
+* write string to calliope 5x5 LED matrix
+* write character to calliope 5x5 LED matrix
 * react on button press with writing to LEDs
 * scan i2c-bus
-* set gpios
+* set gpio digital values
 * write text to a connected oled ( ssd1306 )
 * read uv index of connected SI1145 ( I use the one of adafruit )
 
@@ -52,7 +72,7 @@ Try out the commands:
 Commands:
 33842:     stat    config       log      imgr      echo         ? 
 33843:   prompt     ticks     tasks  mempools      date      gpio 
-33845:      i2c      oled        uv    matrix 
+33845:      i2c      oled        uv    matrix      rgb
 
 33846: > gpio
 usage: gpio <pin> <onOff>, <pin>: P0..P20 oder p0..p30, onOff: 0 oder 1
@@ -63,23 +83,20 @@ i2c probe|scan
 36258: > oled
 oled clr|p <string>
 
+Before using oled you need to enter the command: oled init
+
 36737: > uv
 uv check|r
 
 37232: > matrix
 
 matrix c <char> | p <string>
+
+1777: > rgb
+
+usage: rgb r|g|b
+
+you can also set the color as six hexdigits like: rgb 004466
 ```
 
 
-Modify the pin configuration in hw/bsp/bbc_microbit/src/hal_bsp.c, if you don't want to use the standard i2c bus:
-
-```
-#if MYNEWT_VAL(I2C_0)
-static const struct nrf51_hal_i2c_cfg hal_i2c_cfg = {
-    .scl_pin = 0,   // EDGE PIN 20
-    .sda_pin = 30,  // EDGE PIN 19
-    .i2c_frequency = 100    /* 100 kHz */
-};
-#endif
-```
