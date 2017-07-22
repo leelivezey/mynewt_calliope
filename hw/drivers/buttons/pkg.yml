@@ -17,8 +17,8 @@
 # under the License.
 #
 
-pkg.name: hw/drivers/display/ssd1306_i2c
-pkg.description: I2C driver for the ssd1306 OLED display
+pkg.name: hw/drivers/buttons
+pkg.description: driver for the buttons of calliope mini
 pkg.author: Alfred Schilken
 pkg.homepage: www.schilken.de
-pkg.keywords: OLED I2C DISPLAY
+pkg.keywords: DRIVER BUTTONS CALLIOPE DEBOUNCE

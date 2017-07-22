@@ -41,6 +41,7 @@ extern void i2c_command_init(void);
 extern void oled_command_init(void);
 extern void uv_command_init(void);
 extern void matrix_command_init(void);
+extern void rgb_command_init(void);
 
 static struct os_callout blinky_callout;
 
@@ -75,11 +76,12 @@ static void initOled() {
 static void FUNCTION_IS_NOT_USED
 button_callback(struct os_event *ev)
 {
-    if((int)ev->ev_arg == BUTTON_A) {
+    if((int)ev->ev_arg == BUTTON_A_PIN) {
         ch++;
         print_char(ch, FALSE);
     } else {
         readAndPrintUV();
+        ch--;
         print_char(ch, TRUE);
     }
 }
@@ -125,6 +127,7 @@ main(int argc, char **argv)
     oled_command_init();
     uv_command_init();
     matrix_command_init();
+    rgb_command_init();
     initOled();
     printAtXY(1, 1, "UV+OLED v0.7");
     printAtXY(1, 4, "Button B fuer  neue Messung");

@@ -36,8 +36,11 @@ pkg.deps:
     - "@apache-mynewt-core/sys/config"
     - "@apache-mynewt-core/boot/bootutil"
     - "@apache-mynewt-core/sys/log/full"
-    - "@mynewt-de-schilken-microbit/hw/drivers/display/microbit_matrix"
-    - "@mynewt-de-schilken-microbit/hw/drivers/display/ssd1306_i2c"
-    - "@mynewt-de-schilken-microbit/hw/drivers/sensors/si1145_i2c"
+    - "@mynewt-de-schilken-calliope/hw/drivers/display/microbit_matrix"
+    - "@mynewt-de-schilken-calliope/hw/drivers/display/ssd1306_i2c"
+    - "@mynewt-de-schilken-calliope/hw/drivers/sensors/si1145_i2c"
+    - "@mynewt-de-schilken-calliope/hw/drivers/display/ws2812b"
+    - "@mynewt-de-schilken-calliope/hw/drivers/buttons"
+
 
 

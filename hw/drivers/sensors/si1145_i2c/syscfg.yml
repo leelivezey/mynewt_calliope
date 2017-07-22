@@ -26,12 +26,7 @@ syscfg.defs:
         description: 'enable SI1145'
         value: 0
 
-#    SI1145_I2C_BUS:
-#        description: 'I2C bus number for the SI1145'
-#        value: -1
     SI1145_I2C_LOG:
         description: 'Enable SI1145 logging'
         value: 0
-#    SI1145_I2C_STATS:
-#        description: 'Enable SI1145 statistics'
-#        value: 0
+

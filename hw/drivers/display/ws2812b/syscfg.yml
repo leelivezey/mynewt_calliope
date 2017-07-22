@@ -17,8 +17,9 @@
 # under the License.
 #
 
-pkg.name: hw/drivers/display/ssd1306_i2c
-pkg.description: I2C driver for the ssd1306 OLED display
-pkg.author: Alfred Schilken
-pkg.homepage: www.schilken.de
-pkg.keywords: OLED I2C DISPLAY
+syscfg.defs:
+
+    WS2812B_LED_PIN:
+       description: 'pin for the bit banging to the ws2812'
+       value: 18
+       # microbit : 3

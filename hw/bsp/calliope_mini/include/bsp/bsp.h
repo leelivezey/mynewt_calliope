@@ -54,8 +54,8 @@ extern uint8_t _ram_start;
 #define LED_ROW2   (14)
 #define LED_ROW3   (15)
 
-#define BUTTON_A   (17)
-#define BUTTON_B   (26)
+#define BUTTON_A_PIN   (17)
+#define BUTTON_B_PIN   (16)
 
 #ifdef __GNUC__
 #define FUNCTION_IS_NOT_USED __attribute__ ((unused))

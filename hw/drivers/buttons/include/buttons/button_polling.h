@@ -16,23 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+//
+// Created by Alfred Schilken on 19.07.17.
+//
 
-#ifndef MYPROJ_SSD1306_I2C_H
-#define MYPROJ_SSD1306_I2C_H
+#include "os/os_eventq.h"
 
-#include <stdio.h>
-#include <stdint.h>
-#include <nrf51.h>
+#ifndef MYPROJ_BUTTON_POLLING_H
+#define MYPROJ_BUTTON_POLLING_H
 
-extern int init_oled();
-extern int printAtXY(uint8_t x, uint8_t y, const char s[]);
-extern int clear_screen(void);
+extern void microbit_set_button_cb(os_event_fn *ev_cb);
 
-#define DISPLAY_WIDTH	128
-#define DISPLAY_HEIGHT	64
-#define DISPLAYSIZE		DISPLAY_WIDTH*DISPLAY_HEIGHT/8	// 8 pages/lines with 128
-// 8-bit-column: 128*64 pixel
-// 1024 bytes
-
-
-#endif
+#endif //MYPROJ_BUTTON_POLLING_H

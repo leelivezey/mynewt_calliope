@@ -1,4 +1,4 @@
-### Target: targets/mydrivertest_repo
+### Target: targets/mydrivertest_calliope
 target.app: "@mynewt-de-schilken-calliope/apps/mydrivertest"
 target.bsp: "@mynewt-de-schilken-calliope/hw/bsp/calliope_mini"
 target.build_profile: "debug"

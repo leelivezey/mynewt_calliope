@@ -21,8 +21,8 @@ syscfg.vals:
 
     I2C_0: 1
 
-    BUTTON_A: 1
-    BUTTON_B: 1
+    BUTTON_A_ENABLED: 1
+    BUTTON_B_ENABLED: 1
 
     SI1145_ENABLED: 1
     SI1145_I2C_LOG: 1
