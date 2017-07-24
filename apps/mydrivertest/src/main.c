@@ -42,6 +42,7 @@ extern void oled_command_init(void);
 extern void uv_command_init(void);
 extern void matrix_command_init(void);
 extern void rgb_command_init(void);
+extern void sound_command_init(void);
 
 static struct os_callout blinky_callout;
 
@@ -128,6 +129,7 @@ main(int argc, char **argv)
     uv_command_init();
     matrix_command_init();
     rgb_command_init();
+    sound_command_init();
     initOled();
     printAtXY(1, 1, "UV+OLED v0.7");
     printAtXY(1, 4, "Button B fuer  neue Messung");

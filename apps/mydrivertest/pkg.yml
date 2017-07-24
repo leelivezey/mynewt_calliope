@@ -41,6 +41,7 @@ pkg.deps:
     - "@mynewt-de-schilken-calliope/hw/drivers/sensors/si1145_i2c"
     - "@mynewt-de-schilken-calliope/hw/drivers/display/ws2812b"
     - "@mynewt-de-schilken-calliope/hw/drivers/buttons"
+    - "@mynewt-de-schilken-calliope/hw/drivers/sound"
 
 
 

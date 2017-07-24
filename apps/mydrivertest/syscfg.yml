@@ -26,3 +26,5 @@ syscfg.vals:
 
     SI1145_ENABLED: 1
     SI1145_I2C_LOG: 1
+
+    SOUND_ENABLED: 1
