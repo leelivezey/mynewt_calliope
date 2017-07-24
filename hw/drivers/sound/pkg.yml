@@ -22,3 +22,6 @@ pkg.description: driver for the sound of calliope mini
 pkg.author: Alfred Schilken
 pkg.homepage: www.schilken.de
 pkg.keywords: DRIVER SOUND PMW CALLIOPE
+
+pkg.init:
+  PWM_init: 502

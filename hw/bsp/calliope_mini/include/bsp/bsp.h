@@ -57,6 +57,12 @@ extern uint8_t _ram_start;
 #define BUTTON_A_PIN   (17)
 #define BUTTON_B_PIN   (16)
 
+#define CALLIOPE_PIN_MOTOR_SLEEP (28)
+#define CALLIOPE_PIN_MOTOR_IN1  (29)
+#define CALLIOPE_PIN_MOTOR_IN2  (30)
+
+#define CALLIOPE_MICROPHONE (3)
+
 #ifdef __GNUC__
 #define FUNCTION_IS_NOT_USED __attribute__ ((unused))
 #else

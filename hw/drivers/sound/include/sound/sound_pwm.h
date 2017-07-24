@@ -26,8 +26,24 @@
 #ifndef MYPROJ_SOUND_PWM_H
 #define MYPROJ_SOUND_PWM_H
 
+//default values
+#define CALLIOPE_SM_DEFAULT_DUTY_M                      50
+#define CALLIOPE_SM_DEFAULT_DUTY_S                      100
+#define CALLIOPE_SM_DEFAULT_FREQUENCY_S                 4000
+#define CALLIOPE_SM_DEFAULT_SILENT_MODE                 1
+
+//constants
+#define CALLIOPE_SM_PRESCALER_M                         2
+#define CALLIOPE_SM_PRESCALER_S                         0
+#define CALLIOPE_SM_PRESCALER_S_LF                      4           //prescaler for creating low frequencies
+#define CALLIOPE_SM_PERIOD_M                            100
+#define CALLIOPE_MIN_FREQUENCY_HZ_S_NP                  245         //min possible frequency due to 16bit timer resolution (without prescaler)
+#define CALLIOPE_MIN_FREQUENCY_HZ_S                     20          //min human audible frequency
+#define CALLIOPE_MAX_FREQUENCY_HZ_S                     20000       //max human audible frequency
+#define CALLIOPE_BOARD_FREQUENCY                        (16000000)
+
 extern void sound_on(uint16_t f);
 extern void sound_off(void);
-extern void sound_silent(void);
+extern void sound_silent(bool on_off);
 
 #endif //MYPROJ_SOUND_PWM_H

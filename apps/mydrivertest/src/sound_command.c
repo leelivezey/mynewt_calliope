@@ -23,11 +23,11 @@ void sound_command_init(void) {
 
 static int sound_shell_func(int argc, char **argv) {
     if (argc != 2) {
-        console_printf("usage: sound s|0|f  with 20 < f < 20000\n");
+        console_printf("usage: sound S|s|0|f  with 20 < f < 20000\n");
         return 1;
     }
     char* argv1 = argv[1];
-    if (strlen(argv1) == 6) {
+    if (strlen(argv1) > 1 ) {
         int f;
         if(sscanf( argv1, "%d", &f) == 1) {
             sound_on((uint16_t)f);
@@ -40,8 +40,12 @@ static int sound_shell_func(int argc, char **argv) {
         sound_off();
         return 0;
     }
+    if (color == 'S') {
+        sound_silent(true);
+        return 0;
+    }
     if (color == 's') {
-        sound_silent();
+        sound_silent(false);
         return 0;
     }
     return 1;
