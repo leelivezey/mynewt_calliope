@@ -77,47 +77,6 @@ static const struct nrf51_hal_i2c_cfg hal_i2c_cfg = {
 };
 #endif
 
-#if MYNEWT_VAL(BUTTON_A | BUTTON_B)
-
-/**
-  * This function handles the HW GPIO interrupt and registers an event in
-  * the event queue to defer taking action here in the ISR context.
-  */
-static struct os_event button_irq_event = {
-        .ev_cb = NULL, // has to be set by application using microbit_set_button_cb()
-        .ev_arg = NULL
-};
-
-static FUNCTION_IS_NOT_USED void gpio_irq_handler(void *arg) {
-    button_irq_event.ev_arg = arg;
-    os_eventq_put(os_eventq_dflt_get(), &button_irq_event);
-}
-
-void microbit_set_button_cb(os_event_fn *ev_cb){
-    button_irq_event.ev_cb = ev_cb;
-#if MYNEWT_VAL(BUTTON_A)
-    hal_gpio_irq_init(BUTTON_A,
-                      gpio_irq_handler,
-                      (void*)BUTTON_A,
-                      HAL_GPIO_TRIG_FALLING,
-                      HAL_GPIO_PULL_UP);
-    /* Enable the IRQ */
-    hal_gpio_irq_enable(BUTTON_A);
-#endif
-
-#if MYNEWT_VAL(BUTTON_B)
-    hal_gpio_irq_init(BUTTON_B,
-                      gpio_irq_handler,
-                      (void*)BUTTON_B,
-                      HAL_GPIO_TRIG_FALLING,
-                      HAL_GPIO_PULL_UP);
-    /* Enable the IRQ */
-    hal_gpio_irq_enable(BUTTON_B);
-#endif
-
-}
-#endif
-
 
 /*
  * What memory to include in coredump.
