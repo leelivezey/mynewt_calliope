@@ -69,8 +69,6 @@ extern uint8_t _ram_start;
 #define FUNCTION_IS_NOT_USED
 #endif
 
-extern void microbit_set_button_cb(os_event_fn *ev_cb);
-
 /* UART info */
 #define CONSOLE_UART    "uart0"
 

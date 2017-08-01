@@ -27,6 +27,7 @@
 #include <microbit_matrix/microbit_matrix.h>
 #include <si1145_i2c/si1145_i2c.h>
 #include <ssd1306_i2c/ssd1306_i2c.h>
+#include <buttons/button_polling.h>
 
 #ifdef ARCH_sim
 #include "mcu/mcu_sim.h"
