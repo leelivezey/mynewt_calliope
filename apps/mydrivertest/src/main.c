@@ -22,6 +22,7 @@
 
 #include "sysinit/sysinit.h"
 #include "os/os.h"
+#include <console/console.h>
 #include "bsp/bsp.h"
 #include "hal/hal_gpio.h"
 #include <microbit_matrix/microbit_matrix.h>
@@ -119,6 +120,7 @@ main(int argc, char **argv)
     mcu_sim_parse_args(argc, argv);
 #endif
     sysinit();
+    console_printf("OS_TICKS_PER_SEC : %d\n", OS_TICKS_PER_SEC);
     g_led_pin = LED_COL2;
     hal_gpio_init_out(LED_ROW1, 1);
     hal_gpio_init_out(g_led_pin, 0);

@@ -2,6 +2,7 @@
 // Created by Alfred Schilken on 18.07.17.
 //
 
+#include "syscfg/syscfg.h"
 #include <shell/shell.h>
 #include <stdio.h>
 #include <console/console.h>
