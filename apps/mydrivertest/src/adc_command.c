@@ -26,13 +26,11 @@ static int adc_poll_cmd(int argc, char **argv);
 struct os_task adc_task;
 bssnz_t os_stack_t adc_stack[ADC_STACK_SIZE];
 
-char buf[6];
-
 static int adc_loop = 0;
-static int previous_value = 0;
+static int previous_value = -1;
 
 int
-adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
+adc_handle_event(struct adc_dev *dev, void *arg, uint8_t etype,
                                   void *buffer, int buffer_len) {
     int value;
     int rc = -1;
@@ -42,10 +40,8 @@ adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
         showIntAs5Digits(value);
         if (!isScrolling()) {
             if(adc_loop && (previous_value != value)){
-                sprintf(buf, "%4d ", value);
-                console_printf(buf);
+                console_printf("%4d ", value);
             }
-//            rc = print_string(buf, FALSE);
         }
     } else {
         console_printf("Error while reading: %d\n", value);
@@ -61,12 +57,12 @@ adc_task_handler(void *unused)
     int rc;
     /* ADC init */
     adc = adc_nrf51_driver_get();
-    rc = adc_event_handler_set(adc, adc_read_event, (void *) NULL);
+    rc = adc_event_handler_set(adc, adc_handle_event, (void *) NULL);
     assert(rc == 0);
 
     while (1) {
         adc_sample(adc);
-        /* Wait 2 second */
+        /* Wait 1/2 second */
         os_time_delay(OS_TICKS_PER_SEC / 2);
     }
 }
@@ -152,6 +148,6 @@ adc_loop_cmd(int argc, char **argv) {
         }
     }
     adc_loop = onOff;
-    console_printf("adc: poll %s\n", onOff == 1 ? "ON" : "OFF");
+    console_printf("adc: loop %s\n", onOff == 1 ? "ON" : "OFF");
     return 0;
 }

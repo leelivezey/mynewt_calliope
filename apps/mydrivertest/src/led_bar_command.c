@@ -8,7 +8,7 @@
 #include <console/console.h>
 #include <assert.h>
 #include <stdio.h>
-//#include <hal/hal_ledbar.h>
+#include <led_bar/led_bar.h>
 
 
 static int ledbar_shell_func(int argc, char **argv);
@@ -35,6 +35,8 @@ static int ledbar_shell_func(int argc, char **argv) {
     char *argv1 = argv[1];
     if (argc == 2 && sscanf(argv1, "%d", &value) == 1) {
         console_printf("ledbar: value %d rc= %d\n", value, rc);
+        led_bar_init();
+        led_bar_set_segments(value);
         return 0;
     } else {
         console_printf("usage: ledbar <value> , value 1-10");

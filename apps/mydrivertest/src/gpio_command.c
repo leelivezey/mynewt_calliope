@@ -80,7 +80,7 @@ gpio_task_handler(void *unused)
 //            console_printf(buf);
             read_and_compare_all_pins();
         }
-        os_time_delay(OS_TICKS_PER_SEC);
+        os_time_delay(OS_TICKS_PER_SEC / 10);
     }
 }
 

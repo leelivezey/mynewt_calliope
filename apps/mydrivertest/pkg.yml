@@ -43,7 +43,8 @@ pkg.deps:
     - "@mynewt-de-schilken-calliope/hw/drivers/buttons"
     - "@mynewt-de-schilken-calliope/hw/drivers/sound"
     - "@mynewt-nrf51-adc-driver/libs/adc_nrf51_driver"
-    - "@mynewt-de-schilken-microbit/hw/drivers/display/microbit_matrix"
+    - "@mynewt-de-schilken-calliope/hw/drivers/display/microbit_matrix"
+    - "@mynewt-de-schilken-calliope/hw/drivers/display/led_bar"
 
 
 
