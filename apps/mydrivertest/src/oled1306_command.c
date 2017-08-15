@@ -1,7 +1,7 @@
 //
 // Created by Alfred Schilken on 28.05.17.
 //
-
+#include "syscfg/syscfg.h"
 #include <shell/shell.h>
 #include <console/console.h>
 #include <assert.h>

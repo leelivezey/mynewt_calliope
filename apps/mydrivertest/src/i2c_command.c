@@ -2,6 +2,8 @@
 // Created by Alfred Schilken on 25.05.17.
 //
 
+#include "syscfg/syscfg.h"
+#include "os/os.h"
 #include <shell/shell.h>
 #include <console/console.h>
 #include <assert.h>
