@@ -31,15 +31,28 @@ static const char *bit_rep[16] = {
         [12] = "1100", [13] = "1101", [14] = "1110", [15] = "1111",
 };
 
+static const const uint8_t digit_pattern[10]= {
+        0b00000,
+        0b00001,
+        0b00011,
+        0b00111,
+        0b01111,
+        0b11111,
+        0b11110,
+        0b11100,
+        0b11000,
+        0b10000
+};
+
 #define FMT8BITS(byte) bit_rep[(byte) >> 4], bit_rep[(byte) & 0x0F]
 
 // erste Stelle: row
 // zweite Stelle: column
 static uint8_t xy2rowcol[] = { 0x00, 0x13, 0x01, 0x14, 0x02,
-                        0x23, 0x24, 0x25, 0x26, 0x27,
-                        0x11, 0x08, 0x12, 0x28, 0x10,
-                        0x07, 0x06, 0x05, 0x04, 0x03,
-                        0x22, 0x16, 0x20, 0x15, 0x21 };
+                               0x23, 0x24, 0x25, 0x26, 0x27,
+                               0x11, 0x08, 0x12, 0x28, 0x10,
+                               0x07, 0x06, 0x05, 0x04, 0x03,
+                               0x22, 0x16, 0x20, 0x15, 0x21 };
 
 static uint16_t visible_row[5];
 static uint32_t gpioBitfieldMask = ROW_MASK | COL_MASK;
@@ -82,19 +95,19 @@ static void init_timer(void) {
 }
 
 static void config_gpio_output(uint32_t bitmask){
-    uint8_t i;
-    reg_out = &NRF_GPIO->OUT;
-    reg_in  = &NRF_GPIO->IN;
-    reg_cnf = NRF_GPIO->PIN_CNF;
-    for (i = 0; i<31; i++) {
-        if (bitmask & (1 << i)) {
-            reg_cnf[i] = (GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos)
-                         | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-                         | (GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
-                         | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-                         | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
-        }
-    }
+uint8_t i;
+reg_out = &NRF_GPIO->OUT;
+reg_in  = &NRF_GPIO->IN;
+reg_cnf = NRF_GPIO->PIN_CNF;
+for (i = 0; i<31; i++) {
+if (bitmask & (1 << i)) {
+reg_cnf[i] = (GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos)
+| (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+| (GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
+| (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
+| (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+}
+}
 }
 
 static void copy_bits_to_visible_rows(char ch) {
@@ -190,6 +203,29 @@ static void led_matrix_refresh() {
     }
 }
 
+void clearPixels() {
+    for (uint8_t y = 0; y < BYTES_PER_CHAR; y++) {
+        visible_row[y] &= ~0b1111100000;            // clear lower 5 bits
+    }
+}
+
+void showIntAs5Digits(uint16_t value){
+    clearPixels();
+    for (int ix = 0; ix < 5; ix++) {
+        uint8_t columnPixels = digit_pattern[value % 10];
+        value = value / 10;
+        for(uint8_t y = 0; y < 5; y++){
+            if (columnPixels & (0x10 >> y)) {
+                visible_row[y] |= (0x20 << ix);
+            }
+        }
+    }
+    _blink_phase_on = true;
+    _scroll = FALSE;
+    _blink = false;
+    init_timer_and_gpio();
+}
+
 int set_pixel_at_xy(uint8_t x, uint8_t y){
     visible_row[y] |= (0x200 >> x);
     return 0;
@@ -217,4 +253,8 @@ int print_string(char* text, boolean loop){
     _blink = false;
     init_timer_and_gpio();
     return 0;
+}
+
+bool isScrolling() {
+    return *_current_ptr && !_loop;
 }

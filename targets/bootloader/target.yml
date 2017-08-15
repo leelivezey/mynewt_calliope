@@ -1,0 +1,4 @@
+### Target: targets/bootloader
+target.app: "@apache-mynewt-core/apps/boot"
+target.bsp: "@mynewt-de-schilken-calliope/hw/bsp/calliope_mini"
+target.build_profile: "optimized"
