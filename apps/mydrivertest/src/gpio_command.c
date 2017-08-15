@@ -15,6 +15,7 @@ static struct shell_cmd gpio_cmd = {
         .sc_cmd_func = gpio_shell_func,
 };
 
+#ifdef BBC_MICROBIT
 int8_t gpio_mapping[21] = {
         3,
         2,
@@ -49,6 +50,10 @@ int getPinFromGpioPin(int8_t gpioPin){
     }
     return pin < numPins ? pin : -1;
 }
+#endif
+
+
+
 
 void gpio_command_init(void) {
     int rc;
@@ -57,18 +62,19 @@ void gpio_command_init(void) {
 }
 
 static int gpio_shell_func(int argc, char **argv) {
-    int pin_nr=-1, onOff;
+    int onOff;
     int gpio_pin=-1;
     char* pin;
     if (argc != 3) {
-        console_printf("usage: gpio <pin> <onOff>, <pin>: P0..P20 oder p0..p30, onOff: 0 oder 1\n");
+        console_printf("usage: gpio <pin> <onOff>, <pin>: p0..p30, onOff: 0 oder 1\n");
         return 1;
     }
     pin = argv[1];
     if (*pin != 'P' && *pin != 'p') {
-        console_printf("<pin>: P0..P20 oder p0..p30\n");
+        console_printf("<pin>: p0..p30\n");
         return 1;
     }
+#ifdef BBC_MICROBIT
     if (sscanf(pin, "P%d", &pin_nr) == 1) {
         if(pin_nr < 0 || pin_nr > 20) {
             console_printf("Board-PIN: 0 bis 20\n");
@@ -76,13 +82,15 @@ static int gpio_shell_func(int argc, char **argv) {
         }
         gpio_pin = gpio_mapping[pin_nr];
     }
-
+#endif
     if (sscanf( pin, "p%d", &gpio_pin) == 1) {
         if(gpio_pin < 0 || gpio_pin > 30) {
             console_printf("CPU-pin: 0 bis 30\n");
             return 1;
         }
-        pin_nr = getPinFromGpioPin((int8_t)gpio_pin);
+#ifdef BBC_MICROBIT
+        int pin_nr = getPinFromGpioPin((int8_t)gpio_pin);
+#endif
     }
     if (sscanf( argv[2], "%d", &onOff) != 1) {
         if(onOff != 0 && onOff != 1) {
@@ -90,7 +98,11 @@ static int gpio_shell_func(int argc, char **argv) {
             return 1;
         }
     }
+#ifdef BBC_MICROBIT
     console_printf("gpio: P%d(p%d) %s\n", pin_nr, gpio_pin, onOff == 0 ? "LOW" : "HIGH");
+#else
+    console_printf("gpio: p%d %s\n", gpio_pin, onOff == 0 ? "LOW" : "HIGH");
+#endif
     hal_gpio_init_out(gpio_pin, onOff);
     return 0;
 }
