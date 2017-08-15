@@ -28,72 +28,42 @@
 #include "ssd1306_i2c/font_8x16.h"
 #include <ssd1306_i2c/ssd1306_i2c.h>
 
+#define ISSI_ADDR_DEFAULT 0x74
+
+
+#define ISSI_REG_CONFIG  0x00
+#define ISSI_REG_CONFIG_PICTUREMODE 0x00
+#define ISSI_REG_CONFIG_AUTOPLAYMODE 0x08
+#define ISSI_REG_CONFIG_AUDIOPLAYMODE 0x18
+
+
+#define ISSI_CONF_PICTUREMODE 0x00
+#define ISSI_CONF_AUTOFRAMEMODE 0x04
+#define ISSI_CONF_AUDIOMODE 0x08
+
+#define ISSI_REG_PICTUREFRAME  0x01
+
+#define ISSI_REG_SHUTDOWN 0x0A
+#define ISSI_REG_AUDIOSYNC 0x06
+
+#define ISSI_COMMANDREGISTER 0xFD
+#define ISSI_BANK_FUNCTIONREG 0x0B    // helpfully called 'page nine'
+
+
 #define I2C_BUS 0
 
 static uint8_t i2c_channel = I2C_BUS;
-static uint8_t i2c_address = 0x3c;
+static uint8_t i2c_address = 0x74;
+
+uint8_t _page = 0;
 
 struct hal_i2c_master_data i2c_data;
 
 extern const uint8_t font8x16[];
 
-const uint8_t ssd1306_init_sequence []  = {	// Initialization Sequence
-        0xAE,			// Display OFF (sleep mode)
-        0x20, 0x00,		// Set Memory Addressing Mode
-        // 00=Horizontal Addressing Mode; 01=Vertical Addressing Mode;
-        // 10=Page Addressing Mode (RESET); 11=Invalid
-        0xB0,			// Set Page Start Address for Page Addressing Mode, 0-7
-        0xC8,			// Set COM Output Scan Direction
-        0x00,			// ---set low column address
-        0x10,			// ---set high column address
-        0x40,			// --set start line address
-        0x81, 0x3F,		// Set contrast control register
-        0xA1,			// Set Segment Re-map. A0=address mapped; A1=address 127 mapped.
-        0xA6,			// Set display mode. A6=Normal; A7=Inverse
-        0xA8, 0x3F,		// Set multiplex ratio(1 to 64)
-        0xA4,			// Output RAM to Display
-        // 0xA4=Output follows RAM content; 0xA5,Output ignores RAM content
-        0xD3, 0x00,		// Set display offset. 00 = no offset
-        0xD5,			// --set display clock divide ratio/oscillator frequency
-        0xF0,			// --set divide ratio
-        0xD9, 0x22,		// Set pre-charge period
-        0xDA, 0x12,		// Set com pins hardware configuration
-        0xDB,			// --set vcomh
-        0x20,			// 0x20,0.77xVcc
-        0x8D, 0x14,		// Set DC-DC enable
-        0xAF			// Display ON in normal mode
-};
-
+/*
 static int
-setPositionXY(uint8_t x, uint8_t y) {
-    int rc;
-    uint8_t command_bytes[5];
-    command_bytes[0] = 0x00;
-    command_bytes[1] = 0xb0 + y;
-    command_bytes[2] = 0x21;
-    command_bytes[3] = x;
-    command_bytes[4] = 0x7f;
-    i2c_data.address = i2c_address;
-    i2c_data.buffer = command_bytes;
-    i2c_data.len = 5;
-    rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
-    return rc;
-}
-
-
-int send_data_byte(uint8_t byte){
-    int rc;
-    uint8_t command_bytes[2];
-    command_bytes[0] = 0x40;
-    command_bytes[1] = byte;
-    i2c_data.address = i2c_address;
-    i2c_data.buffer = command_bytes;
-    i2c_data.len = 2;
-    rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
-    return rc;
-}
-
-int send_data_bytes(uint8_t bytes[], uint8_t size){
+send_data_bytes(uint8_t bytes[], uint8_t size){
     int rc;
     uint8_t command_bytes[9];
     command_bytes[0] = 0x40;
@@ -104,59 +74,50 @@ int send_data_bytes(uint8_t bytes[], uint8_t size){
     rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
     return rc;
 }
+*/
 
-int clear_screen(void) {
-    int rc;
-    uint16_t i;
-    rc = setPositionXY(0, 0);
-    uint8_t buffer[8] = { 0,0,0,0,0,0,0,0};
-    for (i = 0; i < DISPLAYSIZE; i++) {
-        send_data_bytes(buffer, 8);
-    }
-    setPositionXY(0, 0);
-    return rc;
-}
-
-int send_command_byte(uint8_t byte){
+static int
+send_function_with_param(uint8_t page, uint8_t function_code, uint8_t param){
     int rc;
     uint8_t command_bytes[2];
-    command_bytes[0] = 0x00;
-    command_bytes[1] = byte;
+    command_bytes[0] = ISSI_COMMANDREGISTER;
+    command_bytes[1] = page;
     i2c_data.address = i2c_address;
     i2c_data.buffer = command_bytes;
     i2c_data.len = 2;
     rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
+
+    command_bytes[0] = function_code;
+    command_bytes[1] = param;
+    i2c_data.address = i2c_address;
+    i2c_data.buffer = command_bytes;
+    i2c_data.len = 2;
+    rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
+
     return rc;
 }
 
-int init_oled(){
+int m7x15_init(){
     int rc;
     i2c_data.address = i2c_address;
-    i2c_data.buffer = (uint8_t*)&ssd1306_init_sequence;
-    i2c_data.len = sizeof(ssd1306_init_sequence);
-    rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
+    rc = send_function_with_param(ISSI_BANK_FUNCTIONREG, ISSI_REG_SHUTDOWN, 0x00);
+    // delay(10);
+    rc = send_function_with_param(ISSI_BANK_FUNCTIONREG, ISSI_REG_SHUTDOWN, 0x01);
+    rc = send_function_with_param(ISSI_BANK_FUNCTIONREG, ISSI_REG_CONFIG, ISSI_REG_CONFIG_PICTUREMODE);
+
+    rc = send_function_with_param(ISSI_BANK_FUNCTIONREG, ISSI_REG_PICTUREFRAME, _page);
+    return rc;
+}
+
+int m7x15_clear(void) {
+    int rc = -1;
     return rc;
 }
 
 int
-printAtXY(uint8_t x, uint8_t y, const char s[]) {
-    uint8_t ch, j = 0;
+m7x15_pixel(uint8_t x, uint8_t y, uint8_t power) {
     int rc = 0;
-
-    while (s[j] != '\0') {
-        ch = s[j] - 32;
-        if (x > 120) {
-            x = 0;
-            y += 2;
-        }
-        rc = setPositionXY(x, y);
-
-        send_data_bytes((uint8_t*)&font8x16[ch * 16], 8);
-        setPositionXY(x, y + 1);
-        send_data_bytes((uint8_t*)&font8x16[ch * 16 + 8], 8);
-        x += 8;
-        j++;
-    }
+    send_function_with_param(_page, 0x24+(x + y*16), power);
     return rc;
 }
 
