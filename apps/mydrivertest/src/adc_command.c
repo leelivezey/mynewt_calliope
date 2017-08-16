@@ -20,6 +20,9 @@ static int adc_poll_cmd(int argc, char **argv);
 #include <adc/adc.h>
 #include "adc_nrf51_driver/adc_nrf51_driver.h"
 
+#include <led_bar/led_bar.h>
+#include <sound/sound_pwm.h>
+
 // /* ADC Task settings */
 #define ADC_TASK_PRIO           5
 #define ADC_STACK_SIZE          (OS_STACK_ALIGN(32))
@@ -40,7 +43,12 @@ adc_handle_event(struct adc_dev *dev, void *arg, uint8_t etype,
         showIntAs5Digits(value);
         if (!isScrolling()) {
             if(adc_loop && (previous_value != value)){
-                console_printf("%4d ", value);
+                uint8_t bar_level = (uint8_t)(value/33);
+                uint16_t f = (uint16_t)(30 + value/2);
+                led_bar_init();
+                led_bar_set_level(bar_level);
+                sound_on((uint16_t)f);
+                console_printf("%4d L:%d f:%d, ", value, (int)bar_level, (int)f);
             }
         }
     } else {
@@ -62,8 +70,8 @@ adc_task_handler(void *unused)
 
     while (1) {
         adc_sample(adc);
-        /* Wait 1/2 second */
-        os_time_delay(OS_TICKS_PER_SEC / 2);
+        /* Wait 1/10 second */
+        os_time_delay(OS_TICKS_PER_SEC / 20);
     }
 }
 

@@ -46,6 +46,7 @@ extern void uv_command_init(void);
 extern void matrix_command_init(void);
 extern void rgb_command_init(void);
 extern void adc_commands_init(void);
+extern void sound_command_init(void);
 extern void ledbar_command_init(void);
 
 static struct os_callout blinky_callout;
@@ -134,6 +135,7 @@ main(int argc, char **argv)
     matrix_command_init();
     rgb_command_init();
     adc_commands_init();
+    sound_command_init();
     ledbar_command_init();
 //    shell_register_default_module("");
     initOled();

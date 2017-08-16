@@ -25,21 +25,31 @@ void ledbar_command_init(void) {
 }
 
 static int ledbar_shell_func(int argc, char **argv) {
-    if (argc < 2) {
-        console_printf("ledbar 0|1|2..|10\n");
+    if (argc < 3) {
+        console_printf("ledbar [b <bitmask 0-3ff>] | [v <volume 0-100> \n");
         return 1;
     }
-    int rc = -1;
-
     int value;
     char *argv1 = argv[1];
-    if (argc == 2 && sscanf(argv1, "%d", &value) == 1) {
-        console_printf("ledbar: value %d rc= %d\n", value, rc);
-        led_bar_init();
-        led_bar_set_segments(value);
-        return 0;
-    } else {
-        console_printf("usage: ledbar <value> , value 1-10");
+    if(*argv1 == 'b') {
+        if (argc == 3 && sscanf(argv[2], "%03x", &value) == 1) {
+            led_bar_init();
+            led_bar_set_segments(value);
+            console_printf("ledbar: b %03x\n", value);
+            return 0;
+        } else {
+            console_printf("usage: ledbar b <bitmask> , <bitmask 0-3ff>\n");
+        }
+    }
+    if(*argv1 == 'v') {
+        if (argc == 3 && sscanf(argv[2], "%d", &value) == 1) {
+            led_bar_init();
+            led_bar_set_level(value);
+            console_printf("ledbar: v %d\n", value);
+            return 0;
+        } else {
+            console_printf("usage: ledbar <value> , value 0-100\n");
+        }
     }
     return 0;
 }

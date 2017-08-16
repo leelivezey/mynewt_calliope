@@ -24,6 +24,7 @@
 #include "hal/hal_gpio.h"
 #include "led_bar/led_bar.h"
 #include "nrf51.h"
+#include "nordic_common.h" // for MIN and MAX
 
 #define LOW         0
 #define HIGH        1
@@ -34,6 +35,20 @@
 
 #define CLOCK_PIN   (MYNEWT_VAL(LED_BAR_CLOCK_PIN))
 #define DATA_PIN    (MYNEWT_VAL(LED_BAR_DATA_PIN))
+
+static uint16_t pwm_lookup[11] = {
+    0b0000000000000000,
+    0b0000000000000001,
+    0b0000000000000011,
+    0b0000000000000111,
+    0b0000000000001111,
+    0b0000000000011111,
+    0b0000000001111111,
+    0b0000000011111111,
+    0b0000000111111111,
+    0b0000001111111111,
+    0b0000001111111111
+};
 
 void
 led_bar_init() {
@@ -104,16 +119,40 @@ led_bar_set_segments(uint16_t index_bits)
 {
     send16bitData(CMDMODE);
 
-    for (int i=0;i<12;i++)
+    for (int i=0; i < 12; i++)
     {
-        uint16_t data_bits = (index_bits & 0x0001) ? ON : OFF;
+        uint16_t data_bits = (index_bits & 0x0200) ? ON : OFF; // highest first
         send16bitData(data_bits);
-        index_bits = index_bits>>1;
+        index_bits = index_bits << 1;
     }
     latchData();
 }
 
+// Set level (0-100)
+// Level 0 means all leds off
+// Level 100 means all leds on
+// Level 45 means 4 LEDs on and the 5th LED's half on
+void led_bar_set_level(uint8_t level) {
+    level = MAX(0, MIN(100, level));
 
+    // Place number of 'level' of 1-bits on __state
+    uint8_t mark = 90;
+    uint16_t data_bits = pwm_lookup[0];
+    uint8_t not_full = 1;
+    for (uint8_t ix = 0; ix < 12; ix++) {
+        if (level < mark) {
+            // take value for 0;
+        } else if (not_full && level >= mark ) {
+            data_bits = pwm_lookup[level - mark];
+            not_full = 0;
+        } else {
+            data_bits = pwm_lookup[9];
+        }
+        send16bitData(data_bits);
+        mark -= 10;
+    };
+    latchData();
+}
 
 
 
