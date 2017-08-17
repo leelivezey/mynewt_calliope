@@ -25,8 +25,7 @@
 #include <stdio.h>
 #include "os/os.h"
 #include <hal/hal_i2c.h>
-#include "ssd1306_i2c/font_8x16.h"
-#include <ssd1306_i2c/ssd1306_i2c.h>
+#include <matrix_15x7/matrix_15x7.h>
 
 #define ISSI_ADDR_DEFAULT 0x74
 
@@ -59,23 +58,6 @@ uint8_t _page = 0;
 
 struct hal_i2c_master_data i2c_data;
 
-extern const uint8_t font8x16[];
-
-/*
-static int
-send_data_bytes(uint8_t bytes[], uint8_t size){
-    int rc;
-    uint8_t command_bytes[9];
-    command_bytes[0] = 0x40;
-    memcpy(&command_bytes[1], bytes, size);
-    i2c_data.address = i2c_address;
-    i2c_data.buffer = command_bytes;
-    i2c_data.len = size+1;
-    rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
-    return rc;
-}
-*/
-
 static int
 send_function_with_param(uint8_t page, uint8_t function_code, uint8_t param){
     int rc;
@@ -97,7 +79,7 @@ send_function_with_param(uint8_t page, uint8_t function_code, uint8_t param){
     return rc;
 }
 
-int m7x15_init(){
+int m15x7_init(){
     int rc;
     i2c_data.address = i2c_address;
     rc = send_function_with_param(ISSI_BANK_FUNCTIONREG, ISSI_REG_SHUTDOWN, 0x00);
@@ -106,18 +88,42 @@ int m7x15_init(){
     rc = send_function_with_param(ISSI_BANK_FUNCTIONREG, ISSI_REG_CONFIG, ISSI_REG_CONFIG_PICTUREMODE);
 
     rc = send_function_with_param(ISSI_BANK_FUNCTIONREG, ISSI_REG_PICTUREFRAME, _page);
+    for (uint8_t page=0; page<8; page++) {
+        for (uint8_t i=0; i<=0x11; i++)
+            send_function_with_param(page, i, 0xff);     // each 8 LEDs on
+    }
     return rc;
 }
 
-int m7x15_clear(void) {
+int m15x7_clear(void) {
     int rc = -1;
     return rc;
 }
 
+/*
+ * x/y in second parameter of function send_function_with_param()
+ *
+ * 7/0 7/1 ... 7/7  8/7 8/6 ... 8/1
+ * 6/0 6/1     6/7  9/7 9/6 ... 9/1
+ * ...              ...
+ * ...              ...
+ * ...              ...
+ * 1/0 1/1 ... 1/7  14/7 ....  14/1
+ */
+
 int
-m7x15_pixel(uint8_t x, uint8_t y, uint8_t power) {
+m15x7_pixel(uint8_t x, uint8_t y, uint8_t power) {
     int rc = 0;
-    send_function_with_param(_page, 0x24+(x + y*16), power);
+    if ((x < 0) || (x > 14) || (y < 0) || (y > 6)) {
+        return -1;
+    }
+    if (x > 7) {
+        x=15-x;
+        y += 8;
+    } else {
+        y = 7-y;
+    }
+    send_function_with_param(_page, 0x24+(y + x*16), power);
     return rc;
 }
 

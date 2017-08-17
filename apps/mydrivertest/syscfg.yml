@@ -19,7 +19,7 @@ syscfg.vals:
     # Include names for statistics.
     STATS_NAMES: 1
 
-    I2C_0: 0
+    I2C_0: 1
 
     BUTTON_A_ENABLED: 1
     BUTTON_B_ENABLED: 1

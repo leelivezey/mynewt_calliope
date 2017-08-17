@@ -48,6 +48,7 @@ extern void rgb_command_init(void);
 extern void adc_commands_init(void);
 extern void sound_command_init(void);
 extern void ledbar_command_init(void);
+extern void m7x15_command_init(void);
 
 static struct os_callout blinky_callout;
 
@@ -137,6 +138,7 @@ main(int argc, char **argv)
     adc_commands_init();
     sound_command_init();
     ledbar_command_init();
+    m7x15_command_init();
 //    shell_register_default_module("");
     initOled();
     printAtXY(1, 1, "UV+OLED v0.7");

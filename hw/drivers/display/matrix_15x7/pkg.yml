@@ -17,7 +17,7 @@
 # under the License.
 #
 
-pkg.name: hw/drivers/display/matrix_7x15
+pkg.name: hw/drivers/display/matrix_15x7
 pkg.description: I2C driver for the adafruit 7x15 LED matrix display
 pkg.author: Alfred Schilken
 pkg.homepage: www.schilken.de

@@ -17,16 +17,15 @@
  * under the License.
  */
 
-#ifndef MICOBIT_LED_MATRIX_FONT_5X5_H
-#define MICOBIT_LED_MATRIX_FONT_5X5_H
+#ifndef MYPROJ_M7X15_H
+#define MYPROJ_M7X15_H
 
+#include <stdio.h>
 #include <stdint.h>
+#include <nrf51.h>
 
+extern int m15x7_init();
+extern int m15x7_pixel(uint8_t x, uint8_t y, uint8_t power);
+extern int m15x7_clear(void);
 
-#define CHARS_IN_FONT 95
-#define BYTES_PER_CHAR 5
-#define PIXEL_PER_CHAR 5
-
-extern const uint8_t font_as_bytes[CHARS_IN_FONT*BYTES_PER_CHAR];
-
-#endif //MICOBIT_LED_MATRIX_FONT_5X5_H
+#endif

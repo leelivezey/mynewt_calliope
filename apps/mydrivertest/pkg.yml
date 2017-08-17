@@ -45,7 +45,7 @@ pkg.deps:
     - "@mynewt-nrf51-adc-driver/libs/adc_nrf51_driver"
     - "@mynewt-de-schilken-calliope/hw/drivers/display/microbit_matrix"
     - "@mynewt-de-schilken-calliope/hw/drivers/display/led_bar"
-    - "@mynewt-de-schilken-calliope/hw/drivers/display/matrix_7x15"
+    - "@mynewt-de-schilken-calliope/hw/drivers/display/matrix_15x7"
 
 
 
