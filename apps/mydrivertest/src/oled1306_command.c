@@ -51,6 +51,19 @@ static int oled_shell_func(int argc, char **argv) {
         return 0;
     }
 
+    if(strcmp(argv[1], "<") == 0){
+        rc = start_scroll_left();
+        console_printf("oled: start scroll left, rc= %d\n", rc);
+        return 0;
+    }
+
+    if(strcmp(argv[1], "0") == 0){
+        rc = stop_scroll();
+        console_printf("oled: stop scroll, rc= %d\n", rc);
+        return 0;
+    }
+
+
     /*
     if(strcmp(argv[1], "inv") == 0){
         rc = send_command_byte(0xA7);
