@@ -27,6 +27,8 @@
 extern int init_oled();
 extern int printAtXY(uint8_t x, uint8_t y, const char s[]);
 extern int clear_screen(void);
+extern int start_scroll_left(void);
+extern int stop_scroll(void);
 
 #define DISPLAY_WIDTH	128
 #define DISPLAY_HEIGHT	64

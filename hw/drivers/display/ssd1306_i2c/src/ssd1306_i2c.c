@@ -30,6 +30,15 @@
 
 #define I2C_BUS 0
 
+#define SSD1306_NORMALDISPLAY           0xA6
+#define SSD1306_INVERTDISPLAY           0xA7
+
+#define SSD1306_ACTIVATE_SCROLL         0x2F
+#define SSD1306_DEACTIVATE_SCROLL       0x2E
+#define SSD1306_SET_VERTICAL_SCROLL_AREA 0xA3
+#define SSD1306_RIGHT_HORIZONTAL_SCROLL 0x26
+#define SSD1306_LEFT_HORIZONTAL_SCROLL  0x27
+
 static uint8_t i2c_channel = I2C_BUS;
 static uint8_t i2c_address = 0x3c;
 
@@ -37,7 +46,7 @@ struct hal_i2c_master_data i2c_data;
 
 extern const uint8_t font8x16[];
 
-const uint8_t ssd1306_init_sequence []  = {	// Initialization Sequence
+static const uint8_t ssd1306_init_sequence []  = {	// Initialization Sequence
         0xAE,			// Display OFF (sleep mode)
         0x20, 0x00,		// Set Memory Addressing Mode
         // 00=Horizontal Addressing Mode; 01=Vertical Addressing Mode;
@@ -80,8 +89,8 @@ setPositionXY(uint8_t x, uint8_t y) {
     return rc;
 }
 
-
-int send_data_byte(uint8_t byte){
+static int
+send_data_byte(uint8_t byte){
     int rc;
     uint8_t command_bytes[2];
     command_bytes[0] = 0x40;
@@ -93,7 +102,8 @@ int send_data_byte(uint8_t byte){
     return rc;
 }
 
-int send_data_bytes(uint8_t bytes[], uint8_t size){
+static int
+send_data_bytes(uint8_t bytes[], uint8_t size){
     int rc;
     uint8_t command_bytes[9];
     command_bytes[0] = 0x40;
@@ -117,7 +127,8 @@ int clear_screen(void) {
     return rc;
 }
 
-int send_command_byte(uint8_t byte){
+static int
+send_command_byte(uint8_t byte){
     int rc;
     uint8_t command_bytes[2];
     command_bytes[0] = 0x00;
@@ -160,6 +171,22 @@ printAtXY(uint8_t x, uint8_t y, const char s[]) {
     return rc;
 }
 
+int
+start_scroll_left(){
+    send_command_byte(SSD1306_LEFT_HORIZONTAL_SCROLL);
+    send_command_byte(0X00);
+    send_command_byte(0);
+    send_command_byte(0X00);
+    send_command_byte(15);
+    send_command_byte(0X00);
+    send_command_byte(0XFF);
+    send_command_byte(SSD1306_ACTIVATE_SCROLL);
+}
+
+int
+stop_scroll() {
+    send_command_byte(SSD1306_DEACTIVATE_SCROLL);
+}
 
 
 
