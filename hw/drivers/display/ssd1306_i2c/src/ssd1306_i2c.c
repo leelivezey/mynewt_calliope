@@ -89,6 +89,7 @@ setPositionXY(uint8_t x, uint8_t y) {
     return rc;
 }
 
+/*
 static int
 send_data_byte(uint8_t byte){
     int rc;
@@ -101,6 +102,7 @@ send_data_byte(uint8_t byte){
     rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
     return rc;
 }
+*/
 
 static int
 send_data_bytes(uint8_t bytes[], uint8_t size){
@@ -181,11 +183,13 @@ start_scroll_left(){
     send_command_byte(0X00);
     send_command_byte(0XFF);
     send_command_byte(SSD1306_ACTIVATE_SCROLL);
+    return 0;
 }
 
 int
 stop_scroll() {
     send_command_byte(SSD1306_DEACTIVATE_SCROLL);
+    return 0;
 }
 
 
