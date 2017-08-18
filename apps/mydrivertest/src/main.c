@@ -30,6 +30,9 @@
 #include <ssd1306_i2c/ssd1306_i2c.h>
 #include <buttons/button_polling.h>
 
+#if MYNEWT_VAL(MATRIX_15X7_ENABLED)
+#include "matrix_15x7/matrix_15x7.h"
+#endif
 
 #ifdef ARCH_sim
 #include "mcu/mcu_sim.h"
@@ -56,6 +59,8 @@ static char ch = ' ';
 
 static bool oled_initilized = false;
 
+
+#if MYNEWT_VAL(SI1145_ENABLED)
 static char print_buffer[20];
 
 static void
@@ -64,6 +69,7 @@ readAndPrintUV() {
     sprintf(print_buffer, "UV-Index: %d.%02d", uv/100, uv%100);
     printAtXY(1, 1, print_buffer);
 }
+#endif
 
 static void initOled() {
     int rc = -1;
@@ -87,10 +93,19 @@ button_callback(struct os_event *ev)
         ch++;
         print_char(ch, FALSE);
     } else {
+#if MYNEWT_VAL(SI1145_ENABLED)
         readAndPrintUV();
+#endif
         ch--;
         print_char(ch, TRUE);
     }
+
+#if MYNEWT_VAL(MATRIX_15X7_ENABLED)
+    char buf[4];
+    sprintf(buf, "%c%c%c", (char)ch-1, (char)ch, (char)ch+1);
+    m15x7_print_string(buf);
+#endif
+
 }
 
 // Event callback function for timer events. It toggles the led pin.

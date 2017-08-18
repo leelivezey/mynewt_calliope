@@ -27,5 +27,7 @@
 extern int m15x7_init();
 extern int m15x7_pixel(uint8_t x, uint8_t y, uint8_t power);
 extern int m15x7_clear(void);
+extern int m15x7_print_char(char ch, uint8_t ix);
+extern int m15x7_print_string(char* text);
 
 #endif

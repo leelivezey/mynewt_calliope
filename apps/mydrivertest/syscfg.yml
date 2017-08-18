@@ -24,7 +24,7 @@ syscfg.vals:
     BUTTON_A_ENABLED: 1
     BUTTON_B_ENABLED: 1
 
-    SI1145_ENABLED: 1
+    SI1145_ENABLED: 0
     SI1145_I2C_LOG: 1
 
     SOUND_ENABLED: 1
@@ -36,3 +36,5 @@ syscfg.vals:
     SHELL_MAX_MODULES: 5
 
     LED_BAR_ENABLED: 1
+
+    MATRIX_15X7_ENABLED: 1
