@@ -89,7 +89,7 @@ setPositionXY(uint8_t x, uint8_t y) {
     return rc;
 }
 
-/*
+
 static int
 send_data_byte(uint8_t byte){
     int rc;
@@ -102,7 +102,7 @@ send_data_byte(uint8_t byte){
     rc = hal_i2c_master_write(i2c_channel, &i2c_data, OS_TICKS_PER_SEC, true);
     return rc;
 }
-*/
+
 
 static int
 send_data_bytes(uint8_t bytes[], uint8_t size){
@@ -192,6 +192,28 @@ stop_scroll() {
     return 0;
 }
 
-
+int
+set_pixel_with_scroll(uint8_t value){
+    uint8_t bits;
+    for(uint8_t y = 0; y < 8; y++){
+        setPositionXY((uint8_t)0, y);
+        if( y == 4) {
+            bits |= 0x80;
+        } else {
+            bits = 0;
+        }
+        send_data_byte((uint8_t) bits);
+    }
+    start_scroll_left();
+    os_time_delay(2);
+    stop_scroll();
+    setPositionXY((uint8_t)127, value/8);
+    bits = 1 << (value % 8);
+    if( value/8 == 4) {
+        bits |= 0x80;
+    }
+    send_data_byte(bits);
+    return 0;
+}
 
 

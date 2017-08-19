@@ -26,6 +26,7 @@
 #include "os/os.h"
 #include <hal/hal_i2c.h>
 #include <matrix_15x7/matrix_15x7.h>
+#include <matrix_15x7/font_5x7.h>
 
 #define ISSI_ADDR_DEFAULT 0x74
 
@@ -97,6 +98,11 @@ int m15x7_init(){
 
 int m15x7_clear(void) {
     int rc = -1;
+    for(uint8_t x = 0; x < 16; x++ ) {
+        for (uint8_t y = 0; y < 9; y++) {
+            rc = m15x7_pixel((uint8_t) x, (uint8_t) y, (uint8_t) 0);
+        }
+    }
     return rc;
 }
 
@@ -127,6 +133,35 @@ m15x7_pixel(uint8_t x, uint8_t y, uint8_t power) {
     return rc;
 }
 
+int m15x7_print_char(char ch, uint8_t ix) {
+    uint8_t xpos = ix * 5;
+    const uint8_t *p_pixeldata;
+    if(ch == '\0') {
+        return -1;
+    }
+    if(ch >= ' ' && ch <= 0x7f) {
+        p_pixeldata = &font5x7[(ch - ' ')*5]; // skip first 32 chars, one char is 5 bytes
+    } else {
+        p_pixeldata = &font5x7[sizeof(font5x7) - 5]; // use last char as fallback
+    }
+    for(uint8_t x = 0; x < 5; x++ ) {
+        for (uint8_t y = 0; y < 7; y++) {
+            if(p_pixeldata[x] & (1 << y)){
+                m15x7_pixel(xpos + x, y, 40);
+            }
+        }
+    }
+    return 0;
+}
+
+
+int m15x7_print_string(char* text) {
+    m15x7_clear();
+    for(int ix = 0; ix < 3; ix++){
+        m15x7_print_char(text[ix], ix);
+    }
+    return 0;
+}
 
 
 
