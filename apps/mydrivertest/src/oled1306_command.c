@@ -6,6 +6,7 @@
 #include <console/console.h>
 #include <assert.h>
 #include <stdio.h>
+#include "os/os.h"
 #include <hal/hal_i2c.h>
 #include <ssd1306_i2c/ssd1306_i2c.h>
 
@@ -52,8 +53,31 @@ static int oled_shell_func(int argc, char **argv) {
     }
 
     if(strcmp(argv[1], "<") == 0){
-        rc = start_scroll_left();
+        int delay = 1;
+        if (argc > 2 && sscanf( argv[2], "%d", &delay) == 1) {
+            rc = set_pixel_with_scroll(delay);
+        } else {
+            rc = start_scroll_left();
+        }
         console_printf("oled: start scroll left, rc= %d\n", rc);
+        return 0;
+    }
+
+    if(strcmp(argv[1], "loop") == 0){
+        int count = 1;
+        if (argc > 2 && sscanf( argv[2], "%d", &count) == 1) {
+            for(uint8_t nn=0; nn < 7; nn++) {
+            for(uint8_t ix = 0; ix < count; ix++) {
+                set_pixel_with_scroll(ix);
+                os_time_delay(20);
+            }
+            for(uint8_t ix = count; ix > 0; ix--) {
+                set_pixel_with_scroll(ix);
+                os_time_delay(10);
+            }
+            console_printf("oled: start scroll left\n");
+            }
+        }
         return 0;
     }
 
