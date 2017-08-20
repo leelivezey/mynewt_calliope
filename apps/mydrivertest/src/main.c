@@ -44,6 +44,7 @@ int g_led_pin;
 
 extern void gpio_commands_init(void);
 extern void i2c_command_init(void);
+extern void i2c_commands_init(void);
 extern void oled_command_init(void);
 extern void uv_command_init(void);
 extern void matrix_command_init(void);
@@ -146,6 +147,7 @@ main(int argc, char **argv)
     init_timer();
     gpio_commands_init();
     i2c_command_init();
+    i2c_commands_init();
     oled_command_init();
     uv_command_init();
     matrix_command_init();
