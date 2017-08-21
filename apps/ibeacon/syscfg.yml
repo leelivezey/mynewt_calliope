@@ -41,6 +41,9 @@ syscfg.vals:
     CONFIG_CLI: 1
     IMGMGR_CLI: 1
 
+    CONFIG_FCB: 1
+#    CONFIG_NFFS: 1  # 13 kB gross!
+
     # Include names for statistics.
     STATS_NAMES: 1
 
