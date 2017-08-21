@@ -42,7 +42,7 @@
 static uint8_t i2c_channel = I2C_BUS;
 static uint8_t i2c_address = 0x3c;
 
-struct hal_i2c_master_data i2c_data;
+static struct hal_i2c_master_data i2c_data;
 
 extern const uint8_t font8x16[];
 

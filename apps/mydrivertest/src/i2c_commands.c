@@ -19,6 +19,7 @@ static int i2c_set_cmd(int argc, char **argv);
 
 #define I2C_MODULE "i2c"
 #define I2C_BUS 0
+static struct hal_i2c_master_data i2c_data;
 
 /*
  * Initialize param and command help information if SHELL_CMD_HELP
@@ -94,6 +95,20 @@ i2c_commands_init(void) {
 
 
 static int
+send_register_and_value(uint8_t i2c_address, uint8_t reg, uint8_t value){
+    int rc;
+    uint8_t command_bytes[2];
+    command_bytes[0] = reg;
+    command_bytes[1] = value;
+    i2c_data.address = i2c_address;
+    i2c_data.buffer = command_bytes;
+    i2c_data.len = 2;
+    rc = hal_i2c_master_write(I2C_BUS, &i2c_data, OS_TICKS_PER_SEC, true);
+    return rc;
+}
+
+
+static int
 i2c_scan_cmd(int argc, char **argv) {
     int address;
     int rc;
@@ -109,36 +124,78 @@ i2c_scan_cmd(int argc, char **argv) {
 
 static int
 i2c_set_cmd(int argc, char **argv) {
+    int i2c_addr = -1;
     int i2c_reg = -1;
     int i2c_val = -1;
-    if (argc != 3) {
-        console_printf("usage: i2c s <reg> <val>, i.e. s 40 ff\n");
+    int rc = -1;
+    if (argc != 4) {
+        console_printf("usage: i2c set <addr> <reg> <val>, i.e. s 48 40 ff\n");
         return 1;
     }
-    if (sscanf(argv[1], "%x", &i2c_reg) != 1) {
+    if (sscanf(argv[1], "%x", &i2c_addr) != 1) {
         return -1;
     }
-    if (sscanf(argv[2], "%x", &i2c_val) != 1) {
+    if (sscanf(argv[2], "%x", &i2c_reg) != 1) {
+        return -1;
+    }
+    if (sscanf(argv[3], "%x", &i2c_val) != 1) {
             return 1;
     }
-    console_printf("i2c: s %02x %02x\n", i2c_reg, i2c_val);
+    rc = send_register_and_value((uint8_t)i2c_addr, (uint8_t)i2c_reg, (uint8_t)i2c_val);
+    if (rc == 0) {
+        console_printf("i2c: addr: %02x -> set reg %02x to value %02x\n", i2c_addr, i2c_reg, i2c_val);
+    } else {
+        console_printf("i2c: rc=%02x\n", rc);
+    }
     return 0;
 }
 
 static int
 i2c_get_cmd(int argc, char **argv) {
+    int i2c_addr = -1;
     int i2c_reg = -1;
     int i2c_count = -1;
-    if (argc != 3) {
-        console_printf("usage: i2c g <reg> <count>, i.e. g 40 1\n");
+    int rc = -1;
+    if (argc != 4) {
+        console_printf("usage: i2c get <addr> <reg> <count>, i.e. g 48 40 1\n");
         return 1;
     }
-    if (sscanf(argv[1], "%x", &i2c_reg) != 1) {
+    if (sscanf(argv[1], "%x", &i2c_addr) != 1) {
         return -1;
     }
-    if (sscanf(argv[2], "%x", &i2c_count) != 1) {
-        return 1;
+    if (sscanf(argv[2], "%x", &i2c_reg) != 1) {
+        return -1;
     }
-    console_printf("i2c: g %02x %02x\n", i2c_reg, i2c_count);
+    if (sscanf(argv[3], "%x", &i2c_count) != 1) {
+        return -2;
+    }
+    if(i2c_count > 8){
+        console_printf("usage: i2c get:  0 < count <= 8\n");
+        return -3;
+    }
+    uint8_t command_bytes[9];
+    command_bytes[0] = i2c_reg;
+    i2c_data.address = i2c_addr;
+    i2c_data.buffer = command_bytes;
+    i2c_data.len = 1;
+    rc = hal_i2c_master_write(I2C_BUS, &i2c_data, OS_TICKS_PER_SEC, true);
+    if(rc != 0){
+        console_printf("i2c: write rc=%02x\n", rc);
+        return -4;
+    }
+    memset(command_bytes, 0x55, sizeof(command_bytes));
+    i2c_data.len = i2c_count;
+    rc = hal_i2c_master_read(I2C_BUS, &i2c_data, OS_TICKS_PER_SEC, true);
+    if (rc == 0) {
+        console_printf("i2c: get %02x %02x\n", i2c_reg, i2c_count);
+        for(int ix = 0; ix < i2c_count; ix++){
+            console_printf("%02x ", command_bytes[ix]);
+        }
+        console_printf("\n");
+    } else {
+        console_printf("i2c: read rc=%02x\n", rc);
+        return -5;
+    }
+
     return 0;
 }
