@@ -23,6 +23,10 @@ pkg.homepage: "http://schilken.de/"
 pkg.keywords:
 
 pkg.deps: 
+    - "@apache-mynewt-core/boot/split"
+    - "@apache-mynewt-core/boot/bootutil"
+    - "@apache-mynewt-core/mgmt/imgmgr"
+    - "@apache-mynewt-core/mgmt/newtmgr"
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/sys/console/full"
