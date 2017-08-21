@@ -28,6 +28,19 @@ syscfg.vals:
     # Disable unused eddystone feature.
     BLE_EDDYSTONE: 0
 
+    # Enable the shell task.
+    SHELL_TASK: 1
+    SHELL_PROMPT_MODULE: 1
+
+    # Enable shell commands.
+    STATS_CLI: 1
+    LOG_CLI: 1
+    CONFIG_CLI: 1
+    IMGMGR_CLI: 1
+
+    # Include names for statistics.
+    STATS_NAMES: 1
+
     # Enable newtmgr commands.
     STATS_NEWTMGR: 1
     LOG_NEWTMGR: 1
