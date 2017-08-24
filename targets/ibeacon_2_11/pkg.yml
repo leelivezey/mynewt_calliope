@@ -1,0 +1,8 @@
+### Package: targets/ibeacon_calliope
+pkg.name: "targets/ibeacon_calliope"
+pkg.type: "target"
+pkg.description: 
+pkg.author: Alfred Schilken
+pkg.homepage: 
+
+pkg.cflags: "-std=gnu99"

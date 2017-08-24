@@ -26,8 +26,9 @@ struct conf_handler ibeacon_conf_handler = {
         .ch_commit = NULL
 };
 
-static uint16_t major = 2;
-static uint16_t minor = 10;
+
+static uint16_t major = MYNEWT_VAL(IBEACON_MAJOR);
+static uint16_t minor = MYNEWT_VAL(IBEACON_MINOR);
 static char minor_str[6];
 static char major_str[6];
 
