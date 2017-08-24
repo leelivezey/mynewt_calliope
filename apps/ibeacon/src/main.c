@@ -4,10 +4,24 @@
 #include "config/config.h"
 #include "host/ble_hs.h"
 #include "log/log.h"
+#include <reboot/log_reboot.h>
 
+#if MYNEWT_VAL(LOG_CONSOLE) || MYNEWT_VAL(LOG_TO_REBOOT_LOG)
+#if MYNEWT_VAL(LOG_CONSOLE)
 #define IBEACON_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
 #define IBEACON_LOG(lvl, ...) LOG_ ## lvl(&ibeacon_log, IBEACON_LOG_MODULE, __VA_ARGS__)
 struct log ibeacon_log;
+#endif
+
+#if MYNEWT_VAL(LOG_TO_REBOOT_LOG)
+// remove the "static" in sys/reboot/src/log_reboot.c to make it public
+extern struct log reboot_log;
+#define IBEACON_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+#define IBEACON_LOG(lvl, ...) LOG_ ## lvl(&reboot_log, IBEACON_LOG_MODULE, __VA_ARGS__)
+#endif
+#else
+#define IBEACON_LOG(__l, __mod, ...) IGNORE(__VA_ARGS__)
+#endif
 
 bool beacon_is_running = false;
 static void update_adv();
@@ -38,6 +52,7 @@ init_config() {
     int rc = conf_register(&ibeacon_conf_handler);
     assert(rc == 0);
     conf_load();
+    reboot_start(hal_reset_cause());
 }
 
 static char *
