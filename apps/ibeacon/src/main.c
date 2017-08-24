@@ -3,6 +3,11 @@
 #include "console/console.h"
 #include "config/config.h"
 #include "host/ble_hs.h"
+#include "log/log.h"
+
+#define IBEACON_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+#define IBEACON_LOG(lvl, ...) LOG_ ## lvl(&ibeacon_log, IBEACON_LOG_MODULE, __VA_ARGS__)
+struct log ibeacon_log;
 
 bool beacon_is_running = false;
 static void update_adv();
@@ -53,6 +58,7 @@ ibeacon_conf_set(int argc, char **argv, char *val) {
     if (argc == 1) {
         if (!strcmp(argv[0], "minor")) {
             int rc = CONF_VALUE_SET(val, CONF_INT16, minor);
+            IBEACON_LOG(INFO, "in ibeacon_conf_set, minor=%d\n", minor);
             if(beacon_is_running){
                 update_adv();
             }
@@ -110,12 +116,14 @@ ble_app_advertise(void) {
     rc = ble_gap_adv_start(BLE_OWN_ADDR_RANDOM, NULL, BLE_HS_FOREVER,
                            &adv_params, NULL, NULL);
     assert(rc == 0);
+    IBEACON_LOG(INFO, "in ble_app_advertise, major=%d, minor=%d\n", major, minor);
     beacon_is_running = true;
 }
 
 static void
 update_adv(){
     console_printf("in update_adv\n");
+    IBEACON_LOG(INFO, "in update_adv, minor=%d\n", minor);
     ble_gap_adv_stop();
     ble_app_advertise();
 }
@@ -133,6 +141,10 @@ ble_app_on_sync(void) {
 int
 main(int argc, char **argv) {
     sysinit();
+#if MYNEWT_VAL(LOG_CONSOLE)
+    log_register("ibeacon", &ibeacon_log, &log_console_handler, NULL, LOG_SYSLEVEL);
+#endif
+
     init_config();
     ble_hs_cfg.sync_cb = ble_app_on_sync;
     /* As the last thing, process events from default event queue. */
