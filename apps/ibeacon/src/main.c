@@ -4,7 +4,7 @@
 #include "config/config.h"
 #include "host/ble_hs.h"
 
-
+bool beacon_is_running = false;
 static void update_adv();
 
 static char *ibeacon_conf_get(int argc, char **argv, char *val, int val_len_max);
@@ -32,6 +32,7 @@ static void
 init_config() {
     int rc = conf_register(&ibeacon_conf_handler);
     assert(rc == 0);
+    conf_load();
 }
 
 static char *
@@ -53,7 +54,9 @@ ibeacon_conf_set(int argc, char **argv, char *val) {
     if (argc == 1) {
         if (!strcmp(argv[0], "minor")) {
             int rc = CONF_VALUE_SET(val, CONF_INT16, minor);
-            update_adv();
+            if(beacon_is_running){
+                update_adv();
+            }
             return rc;
         } else if (!strcmp(argv[0], "major")) {
             return CONF_VALUE_SET(val, CONF_INT16, major);
@@ -108,10 +111,12 @@ ble_app_advertise(void) {
     rc = ble_gap_adv_start(BLE_OWN_ADDR_RANDOM, NULL, BLE_HS_FOREVER,
                            &adv_params, NULL, NULL);
     assert(rc == 0);
+    beacon_is_running = true;
 }
 
 static void
 update_adv(){
+    console_printf("in update_adv\n");
     ble_gap_adv_stop();
     ble_app_advertise();
 }
@@ -131,7 +136,6 @@ main(int argc, char **argv) {
     sysinit();
     init_config();
     ble_hs_cfg.sync_cb = ble_app_on_sync;
-
     /* As the last thing, process events from default event queue. */
     while (1) {
         os_eventq_run(os_eventq_dflt_get());
