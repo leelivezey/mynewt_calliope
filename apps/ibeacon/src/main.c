@@ -5,6 +5,7 @@
 #include "host/ble_hs.h"
 #include "log/log.h"
 #include <reboot/log_reboot.h>
+#include "eddystone_util.h"
 
 #if MYNEWT_VAL(LOG_CONSOLE) || MYNEWT_VAL(LOG_TO_REBOOT_LOG)
 #if MYNEWT_VAL(LOG_CONSOLE)
@@ -24,6 +25,7 @@ extern struct log reboot_log;
 #endif
 
 bool beacon_is_running = false;
+
 static void update_adv();
 
 static char *ibeacon_conf_get(int argc, char **argv, char *val, int val_len_max);
@@ -45,8 +47,7 @@ static uint16_t major = MYNEWT_VAL(IBEACON_MAJOR);
 static uint16_t minor = MYNEWT_VAL(IBEACON_MINOR);
 static char minor_str[6];
 static char major_str[6];
-
-
+static char eddystone_full_url[BLE_EDDYSTONE_URL_MAX_LEN+12+6];
 static void
 init_config() {
     int rc = conf_register(&ibeacon_conf_handler);
@@ -64,9 +65,11 @@ ibeacon_conf_get(int argc, char **argv, char *val, int val_len_max) {
         } else if (!strcmp(argv[0], "major")) {
             return conf_str_from_value(CONF_INT16, &major,
                                        major_str, sizeof major_str);
+        } else if (!strcmp(argv[0], "url")) {
+            return eddystone_full_url;
         }
     }
-        return NULL;
+    return NULL;
 }
 
 static int
@@ -75,12 +78,28 @@ ibeacon_conf_set(int argc, char **argv, char *val) {
         if (!strcmp(argv[0], "minor")) {
             int rc = CONF_VALUE_SET(val, CONF_INT16, minor);
             IBEACON_LOG(INFO, "in ibeacon_conf_set, minor=%d\n", minor);
-            if(beacon_is_running){
+            eddystone_full_url[0] = 0;
+            if (beacon_is_running) {
                 update_adv();
             }
             return rc;
         } else if (!strcmp(argv[0], "major")) {
             return CONF_VALUE_SET(val, CONF_INT16, major);
+        } else if (!strcmp(argv[0], "url")) {
+            uint8_t not_used;
+            int rc = cmd_parse_eddystone_url(val, &not_used,
+                                             eddystone_full_url, // only temporary
+                                             &not_used,
+                                             &not_used);
+            if (rc != 0) {
+                eddystone_full_url[0] = 0;
+                return OS_INVALID_PARM; // too long or invalid
+            }
+            rc = CONF_VALUE_SET(val, CONF_STRING, eddystone_full_url);
+            if (beacon_is_running) {
+                update_adv();
+            }
+            return rc;
         }
     }
     return OS_ENOENT;
@@ -88,8 +107,7 @@ ibeacon_conf_set(int argc, char **argv, char *val) {
 
 static int
 ibeacon_conf_export(void (*export_func)(char *name, char *val),
-               enum conf_export_tgt tgt)
-{
+                    enum conf_export_tgt tgt) {
 //    if (tgt == CONF_EXPORT_SHOW) {
 //    }
 // for CONF_EXPORT_SHOW and CONF_EXPORT_PERSIST
@@ -97,6 +115,7 @@ ibeacon_conf_export(void (*export_func)(char *name, char *val),
                                                      minor_str, sizeof minor_str));
     export_func("ibeacon/major", conf_str_from_value(CONF_INT16, &major,
                                                      major_str, sizeof major_str));
+    export_func("ibeacon/url", (char *) eddystone_full_url);
     return 0;
 }
 
@@ -117,15 +136,33 @@ ble_app_set_addr(void) {
 static void
 ble_app_advertise(void) {
     struct ble_gap_adv_params adv_params;
+    struct ble_hs_adv_fields fields;
     uint8_t uuid128[16];
     int rc;
 
     /* Arbitrarily set the UUID to a string of 0x11 bytes. */
     memset(uuid128, 0x11, sizeof uuid128);
 
-    /* Major version=2; minor version=10. */
-    rc = ble_ibeacon_set_adv_data(uuid128, major, minor);
-    assert(rc == 0);
+    if (strlen(eddystone_full_url) > 0) {
+        uint8_t eddystone_url_scheme;
+        uint8_t eddystone_url_body_len;
+        uint8_t eddystone_url_suffix;
+        char eddystone_url_body[BLE_EDDYSTONE_URL_MAX_LEN];
+        cmd_parse_eddystone_url(eddystone_full_url, &eddystone_url_scheme,
+                                         eddystone_url_body,
+                                         &eddystone_url_body_len,
+                                         &eddystone_url_suffix);
+        fields = (struct ble_hs_adv_fields){ 0 };
+        rc = ble_eddystone_set_adv_data_url(&fields,
+                                            eddystone_url_scheme,
+                                            eddystone_url_body,
+                                            eddystone_url_body_len,
+                                            eddystone_url_suffix);
+    } else {
+        /* Major version=2; minor version=10. */
+        rc = ble_ibeacon_set_adv_data(uuid128, major, minor);
+        assert(rc == 0);
+    }
 
     /* Begin advertising. */
     adv_params = (struct ble_gap_adv_params) {0};
@@ -137,7 +174,7 @@ ble_app_advertise(void) {
 }
 
 static void
-update_adv(){
+update_adv() {
     console_printf("in update_adv\n");
     IBEACON_LOG(INFO, "in update_adv, minor=%d\n", minor);
     ble_gap_adv_stop();
