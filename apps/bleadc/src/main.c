@@ -36,9 +36,14 @@
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
 
+
+
+#define INFO WARN
 /* Application-specified header. */
 #include "bleprph.h"
 
+#define ADC_ENABLE 1
+#if ADC_ENABLE
 /* ADC */
 #include <adc/adc.h>
 #include "adc_nrf51_driver/adc_nrf51_driver.h"
@@ -86,6 +91,7 @@ adc_task_handler(void *unused)
         os_time_delay((OS_TICKS_PER_SEC * gatt_adc_period)/1000);
     }
 }
+#endif
 
 /** Log data. */
 struct log bleprph_log;
@@ -255,7 +261,7 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
         return 0;
 
     case BLE_GAP_EVENT_SUBSCRIBE:
-        BLEPRPH_LOG(INFO, "subscribe event; conn_handle=%d attr_handle=%d "
+/*        BLEPRPH_LOG(INFO, "subscribe event; conn_handle=%d attr_handle=%d "
                           "reason=%d prevn=%d curn=%d previ=%d curi=%d\n",
                     event->subscribe.conn_handle,
                     event->subscribe.attr_handle,
@@ -264,6 +270,7 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
                     event->subscribe.cur_notify,
                     event->subscribe.prev_indicate,
                     event->subscribe.cur_indicate);
+                    */
         return 0;
 
     case BLE_GAP_EVENT_MTU:
@@ -326,10 +333,11 @@ main(void)
     /* Set the default device name. */
     rc = ble_svc_gap_device_name_set("ble_adc");
     assert(rc == 0);
+#if ADC_ENABLE
     os_task_init(&adc_task, "sensor", adc_task_handler,
                  NULL, ADC_TASK_PRIO, OS_WAIT_FOREVER,
                  adc_stack, ADC_STACK_SIZE);
-
+#endif
     conf_load();
 
     /* If this app is acting as the loader in a split image setup, jump into

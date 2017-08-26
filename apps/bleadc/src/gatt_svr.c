@@ -104,10 +104,14 @@ static int gatt_svr_sns_access(uint16_t conn_handle, uint16_t attr_handle, struc
 
         case ADC_SNS_PERIOD:
             if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
+                BLEPRPH_LOG(INFO, "ADC_SNS_PERIOD WRITE:  %x\n", ctxt->om->om_data);
+                print_bytes(ctxt->om->om_data, ctxt->om->om_len);
                 rc = gatt_svr_chr_write(ctxt->om, 0, sizeof gatt_adc_period, &gatt_adc_period, NULL);
                 return rc;
             } else if (ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR) {
                 rc = os_mbuf_append(ctxt->om, &gatt_adc_period, sizeof gatt_adc_period);
+                print_bytes(ctxt->om->om_data, ctxt->om->om_len);
+                BLEPRPH_LOG(INFO, "ADC_SNS_PERIOD READ: %x\n", ctxt->om->om_data);
                 return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
             }
 

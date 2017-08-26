@@ -33,9 +33,9 @@ syscfg.vals:
     BLE_EDDYSTONE: 0
 
     # Log reboot messages to a flash circular buffer.
-    REBOOT_LOG_FCB: 1
-    LOG_FCB: 1
-    CONFIG_FCB: 1
+    REBOOT_LOG_FCB: 0
+    LOG_FCB: 0
+    CONFIG_FCB: 0
 
     # Enable newtmgr commands.
     STATS_NEWTMGR: 1
@@ -49,7 +49,7 @@ syscfg.vals:
 
     SHELL_TASK: 1
     STATS_CLI: 1
-    STATS_NAMES: 1
+    STATS_NAMES: 0
 
     # RAM reduction
     BLE_ACL_BUF_COUNT: 2    # was 4
@@ -58,5 +58,9 @@ syscfg.vals:
     MSYS_1_BLOCK_SIZE: 180 # was 292
 
     ADC_0_SCALING: NRF_ADC_CONFIG_SCALING_INPUT_ONE_THIRD
-    ADC_0_INPUT: NRF_ADC_CONFIG_INPUT_2
+    ADC_0_INPUT: NRF_ADC_CONFIG_INPUT_0  #  p0.26  ->  Grove B Pin 1
     ADC_0_SAMPLES: 1
+
+    SHELL_CMD_HELP: 0
+    LOG_CLI: 0
+    SHELL_OS_MODULE: 0

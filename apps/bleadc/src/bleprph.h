@@ -37,7 +37,7 @@ extern struct log bleprph_log;
 
 /* Convenience macro for logging to the bleprph module. */
 #define BLEPRPH_LOG(lvl, ...) \
-    LOG_ ## lvl(&bleprph_log, BLEPRPH_LOG_MODULE, __VA_ARGS__)
+    LOG_WARN(&bleprph_log, BLEPRPH_LOG_MODULE, __VA_ARGS__)
 
 /** GATT server. */
 /* Sensor Data */
