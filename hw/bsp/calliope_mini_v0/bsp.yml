@@ -20,16 +20,16 @@
 bsp.arch: cortex_m0
 bsp.compiler: "@apache-mynewt-core/compiler/arm-none-eabi-m0"
 bsp.linkerscript:
-    - hw/bsp/calliope_mini/nrf51xxac.ld
+    - "@apache-mynewt-core/hw/bsp/bbc_microbit/nrf51xxac.ld"
     - "@apache-mynewt-core/hw/mcu/nordic/nrf51xxx/nrf51.ld"
 bsp.linkerscript.BOOT_LOADER.OVERWRITE:
-    - hw/bsp/calliope_mini/boot-nrf51xxac.ld
+    - "@apache-mynewt-core/hw/bsp/bbc_microbit/boot-nrf51xxac.ld"
     - "@apache-mynewt-core/hw/mcu/nordic/nrf51xxx/nrf51.ld"
-bsp.part2linkerscript: hw/bsp/calliope_mini/split-microbit.ld
-bsp.downloadscript: hw/bsp/calliope_mini/microbit_download.sh
-bsp.debugscript: hw/bsp/calliope_mini/microbit_debug.sh
-bsp.downloadscript.WINDOWS.OVERWRITE: hw/bsp/calliope_mini/microbit_download.cmd
-bsp.debugscript.WINDOWS.OVERWRITE: hw/bsp/calliope_mini/microbit_debug.cmd
+bsp.part2linkerscript: "@apache-mynewt-core/hw/bsp/bbc_microbit/split-microbit.ld"
+bsp.downloadscript: "@apache-mynewt-core/hw/bsp/bbc_microbit/microbit_download.sh"
+bsp.debugscript: "@apache-mynewt-core/hw/bsp/bbc_microbit/microbit_debug.sh"
+bsp.downloadscript.WINDOWS.OVERWRITE: "@apache-mynewt-core/hw/bsp/bbc_microbit/microbit_download.cmd"
+bsp.debugscript.WINDOWS.OVERWRITE: "@apache-mynewt-core/hw/bsp/bbc_microbit/microbit_debug.cmd"
 
 bsp.flash_map:
     areas:
@@ -40,30 +40,25 @@ bsp.flash_map:
             size: 16kB
         FLASH_AREA_IMAGE_0:
             device: 0
-            offset: 0x00004000
-            size: 117kB
+            offset: 0x00008000
+            size: 110kB
         FLASH_AREA_IMAGE_1:
             device: 0
-            offset: 0x00021400
-            size: 117kB
+            offset: 0x00023800
+            size: 110kB
         FLASH_AREA_IMAGE_SCRATCH:
             device: 0
-            offset: 0x0003e800
+            offset: 0x0003f000
             size: 2kB
 
         # User areas.
         FLASH_AREA_REBOOT_LOG:
             user_id: 0
             device: 0
-            offset: 0x0003f000
-            size: 1kB
-        FLASH_AREA_FCB_CONF:
+            offset: 0x00004000
+            size: 16kB
+        FLASH_AREA_NFFS:
             user_id: 1
-            device: 0
-            offset: 0x0003f400
-            size: 1kB
-        FLASH_AREA_FCB_LOG:
-            user_id: 2
             device: 0
             offset: 0x0003f800
             size: 2kB
