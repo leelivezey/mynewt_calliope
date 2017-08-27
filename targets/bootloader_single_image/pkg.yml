@@ -1,0 +1,7 @@
+### Package: targets/bootloader
+pkg.name: "targets/bootloader_single_image"
+pkg.type: "target"
+pkg.description: bootloader fuer calliope oder microbit 
+pkg.author: alfred schilken
+pkg.homepage: 
+
