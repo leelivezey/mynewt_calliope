@@ -6,19 +6,20 @@
 #include "log/log.h"
 #include <reboot/log_reboot.h>
 #include "eddystone_util.h"
+#include "init_fcb_log.h"
 
-#if MYNEWT_VAL(LOG_CONSOLE) || MYNEWT_VAL(LOG_TO_REBOOT_LOG)
+#if MYNEWT_VAL(LOG_CONSOLE) || MYNEWT_VAL(LOG_FCB)
+struct log ibeacon_log;
 #if MYNEWT_VAL(LOG_CONSOLE)
 #define IBEACON_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
 #define IBEACON_LOG(lvl, ...) LOG_ ## lvl(&ibeacon_log, IBEACON_LOG_MODULE, __VA_ARGS__)
-struct log ibeacon_log;
 #endif
 
-#if MYNEWT_VAL(LOG_TO_REBOOT_LOG)
+#if MYNEWT_VAL(LOG_FCB)
 // remove the "static" in sys/reboot/src/log_reboot.c to make it public
 extern struct log reboot_log;
 #define IBEACON_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
-#define IBEACON_LOG(lvl, ...) LOG_ ## lvl(&reboot_log, IBEACON_LOG_MODULE, __VA_ARGS__)
+#define IBEACON_LOG(lvl, ...) LOG_ ## lvl(&ibeacon_log, IBEACON_LOG_MODULE, __VA_ARGS__)
 #endif
 #else
 #define IBEACON_LOG(__l, __mod, ...) IGNORE(__VA_ARGS__)
@@ -198,6 +199,11 @@ main(int argc, char **argv) {
     log_register("ibeacon", &ibeacon_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 #endif
 
+#if MYNEWT_VAL(LOG_FCB)
+    init_log_fcb_handler();
+    log_register("ibeacon", &ibeacon_log, &log_fcb_handler, &the_log_fcb, LOG_SYSLEVEL);
+#endif
+    IBEACON_LOG(INFO, "logging active \n");
     init_config();
     ble_hs_cfg.sync_cb = ble_app_on_sync;
     /* As the last thing, process events from default event queue. */
