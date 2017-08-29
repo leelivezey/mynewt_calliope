@@ -67,12 +67,10 @@ console_echo(int on)
 int console_printf(const char *fmt, ...)
 __attribute__ ((format (printf, 1, 2)));
 
+void console_set_queues(struct os_eventq *avail_queue,
+                   struct os_eventq *cmd_queue);
 
-static void inline
-console_set_queues(struct os_eventq *avail_queue,
-                   struct os_eventq *cmd_queue)
-{
-}
+void shell_cmd_write(const char *str, int cnt);
 
 static void inline
 console_set_completion_cb(completion_cb cb)

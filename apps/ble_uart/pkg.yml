@@ -43,3 +43,4 @@ pkg.deps:
     - "@apache-mynewt-core/sys/sysinit"
     - "@apache-mynewt-core/sys/id"
     - libs/ble_uart_console
+    - "@mynewt-de-schilken-calliope/hw/drivers/sound"

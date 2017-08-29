@@ -37,6 +37,7 @@
 #include "services/gap/ble_svc_gap.h"
 #include "bleuart.h"
 
+extern void sound_command_init();
 
 #define INFO WARN
 /* Application-specified header. */
@@ -260,7 +261,7 @@ main(void)
     rc = ble_svc_gap_device_name_set("ble_uart");
     assert(rc == 0);
     conf_load();
-
+    sound_command_init();
     /* If this app is acting as the loader in a split image setup, jump into
      * the second stage application instead of starting the OS.
      */

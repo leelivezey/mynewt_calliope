@@ -101,10 +101,10 @@ gatt_svr_chr_access_uart_write(uint16_t conn_handle, uint16_t attr_handle,
     switch (ctxt->op) {
         case BLE_GATT_ACCESS_OP_WRITE_CHR:
               while(om) {
-                  console_write((char *)om->om_data, om->om_len);
+                  shell_cmd_write((char *)om->om_data, om->om_len);
                   om = SLIST_NEXT(om, om_next);
               }
-              console_write("\n", 1);
+              shell_cmd_write("\n", 1);
               return 0;
         default:
             assert(0);

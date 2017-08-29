@@ -54,7 +54,7 @@ syscfg.vals:
     # OS main/default task
     OS_MAIN_STACK_SIZE: 256  # was 1024
 
-    SHELL_TASK: 0
+    SHELL_TASK: 1
     STATS_CLI: 0
     STATS_NAMES: 0
 
@@ -71,3 +71,6 @@ syscfg.vals:
     SHELL_CMD_HELP: 0
     LOG_CLI: 0
     SHELL_OS_MODULE: 0
+
+    CONSOLE_COMPAT: 1
+    SOUND_ENABLED: 1
