@@ -35,7 +35,7 @@
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
-#include "bleuart/bleuart.h"
+#include "bleuart.h"
 
 
 #define INFO WARN
@@ -247,10 +247,12 @@ main(void)
     /* Initialize the NimBLE host configuration. */
     log_register("ble_hs", &ble_hs_log, &log_console_handler, NULL,
                  LOG_SYSLEVEL);
+
     ble_hs_cfg.reset_cb = bleprph_on_reset;
     ble_hs_cfg.sync_cb = bleprph_on_sync;
 //    ble_hs_cfg.gatts_register_cb = gatt_svr_register_cb;
 
+    bleuart_init();
     rc = bleuart_gatt_svr_init();
     assert(rc == 0);
 
