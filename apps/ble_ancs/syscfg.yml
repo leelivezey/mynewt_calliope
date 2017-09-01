@@ -22,8 +22,8 @@ syscfg.vals:
     LOG_LEVEL: 1
     # Disable central and observer roles.
     BLE_ROLE_BROADCASTER: 1
-    BLE_ROLE_CENTRAL: 0
-    BLE_ROLE_OBSERVER: 0
+    BLE_ROLE_CENTRAL: 1
+    BLE_ROLE_OBSERVER: 1
     BLE_ROLE_PERIPHERAL: 1
 
     # Disable unused eddystone feature.
@@ -32,17 +32,23 @@ syscfg.vals:
     # Log reboot messages to a flash circular buffer.
     REBOOT_LOG_FCB: 1
     LOG_FCB: 1
-    CONFIG_FCB: 1
+#    CONFIG_FCB: 1
 
     # Enable newtmgr commands.
-    STATS_NEWTMGR: 1
-    LOG_NEWTMGR: 1
-    CONFIG_NEWTMGR: 1
+#    STATS_NEWTMGR: 1
+#    LOG_NEWTMGR: 1
+#    CONFIG_NEWTMGR: 1
 
     # OS main/default task
-    OS_MAIN_STACK_SIZE: 468
+    OS_MAIN_STACK_SIZE: 336
 
     # Lots of smaller mbufs are required for newtmgr using typical BLE ATT MTU
     # values.
-    MSYS_1_BLOCK_COUNT: 22
-    MSYS_1_BLOCK_SIZE: 110
+#    MSYS_1_BLOCK_COUNT: 22
+#    MSYS_1_BLOCK_SIZE: 110
+
+        # RAM reduction
+    BLE_ACL_BUF_COUNT: 2    # was 4
+    BLE_ACL_BUF_SIZE: 255  # was 255
+    MSYS_1_BLOCK_COUNT: 10  # was 12
+    MSYS_1_BLOCK_SIZE: 120 # was 292
