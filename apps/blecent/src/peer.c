@@ -190,7 +190,7 @@ peer_disc_dscs(struct peer *peer)
      */
     SLIST_FOREACH(svc, &peer->svcs, next) {
         SLIST_FOREACH(chr, &svc->chrs, next) {
-            if (false && !chr_is_empty(svc, chr) &&  // SKA!!
+            if (false && !chr_is_empty(svc, chr) &&  // IGNORE DESCRIPTORS!!
                 SLIST_EMPTY(&chr->dscs) &&
                 peer->disc_prev_chr_val <= chr->chr.def_handle) {
 

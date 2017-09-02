@@ -44,14 +44,6 @@ extern struct log blecent_log;
 #define BLECENT_SVC_IMMEDIATE_ALERT_UUID     0x1802
 #define BLECENT_CHR_ALERT_LEVEL              0x2a06
 
-
-#define BLECENT_SVC_ALERT_UUID              0x1811
-#define BLECENT_CHR_SUP_NEW_ALERT_CAT_UUID  0x2A47
-#define BLECENT_CHR_NEW_ALERT               0x2A46
-#define BLECENT_CHR_SUP_UNR_ALERT_CAT_UUID  0x2A48
-#define BLECENT_CHR_UNR_ALERT_STAT_UUID     0x2A45
-#define BLECENT_CHR_ALERT_NOT_CTRL_PT       0x2A44
-
 /** Misc. */
 void print_bytes(const uint8_t *bytes, int len);
 void print_mbuf(const struct os_mbuf *om);
