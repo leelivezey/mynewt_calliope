@@ -89,7 +89,7 @@ blecent_write_command(const struct peer *peer)
         goto err;
     }
 
-    value[0] = 1;
+    value[0] = MYNEWT_VAL(ALERT_LEVEL);
     rc = ble_gattc_write_no_rsp_flat(peer->conn_handle, chr->chr.val_handle,
                               value, sizeof value);
     if (rc != 0) {
@@ -166,46 +166,6 @@ blecent_scan(void)
 }
 
 /**
- * Indicates whether we should tre to connect to the sender of the specified
- * advertisement.  The function returns a positive result if the device
- * advertises connectability and support for the Alert Notification service.
- */
-static int
-blecent_should_connect(const struct ble_gap_disc_desc *disc)
-{
-    struct ble_hs_adv_fields fields;
-    int rc;
-    int i;
-
-    /* The device has to be advertising connectability. */
-    if (disc->event_type != BLE_HCI_ADV_RPT_EVTYPE_ADV_IND &&
-        disc->event_type != BLE_HCI_ADV_RPT_EVTYPE_DIR_IND) {
-
-        return 0;
-    }
-
-    rc = ble_hs_adv_parse_fields(&fields, disc->data, disc->length_data);
-    if (rc != 0) {
-        return rc;
-    }
-
-    if(disc->addr.val[0] == 0x18){
-        return 1;
-    }
-
-    /* The device has to advertise support for the IMMEDIATE_ALERT
-     * service (0x1802).
-     */
-    for (i = 0; i < fields.num_uuids16; i++) {
-        if (ble_uuid_u16(&fields.uuids16[i].u) == BLECENT_SVC_IMMEDIATE_ALERT_UUID) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-/**
  * Connects to the sender of the specified advertisement of it looks
  * interesting.  A device is "interesting" if it advertises connectability and
  * support for the Alert Notification service.
@@ -215,10 +175,16 @@ blecent_connect_if_interesting(const struct ble_gap_disc_desc *disc)
 {
     int rc;
 
-    /* Don't do anything if we don't care about this advertiser. */
-    if (!blecent_should_connect(disc)) {
+    /* The device has to be advertising connectability. */
+    if (disc->event_type != BLE_HCI_ADV_RPT_EVTYPE_ADV_IND &&
+        disc->event_type != BLE_HCI_ADV_RPT_EVTYPE_DIR_IND) {
         return;
     }
+
+    if(strcmp(addr_str(disc->addr.val), MYNEWT_VAL(PEER_BLE_ADDR)) != 0) {
+        return;
+    }
+    BLECENT_LOG(INFO, "found right bluetooth-address\n");
 
     /* Scanning must be stopped before a connection can be initiated. */
     rc = ble_gap_disc_cancel();
@@ -263,15 +229,17 @@ blecent_gap_event(struct ble_gap_event *event, void *arg)
 
     switch (event->type) {
     case BLE_GAP_EVENT_DISC:
-        rc = ble_hs_adv_parse_fields(&fields, event->disc.data,
+        BLECENT_LOG(DEBUG, "ADVERTIZING-PAKET: length=%d peer_addr=%s \n",
+                    event->disc.length_data,
+                    addr_str(event->disc.addr.val));
+            print_bytes(event->disc.data, event->disc.length_data);
+            BLECENT_LOG(DEBUG, "\n-----\n\n");
+
+            rc = ble_hs_adv_parse_fields(&fields, event->disc.data,
                                      event->disc.length_data);
         if (rc != 0) {
             return 0;
         }
-
-        /* An advertisment report was received during GAP discovery. */
-        print_adv_fields(&fields);
-
         /* Try to connect to the advertiser if it looks interesting. */
         blecent_connect_if_interesting(&event->disc);
         return 0;

@@ -38,8 +38,9 @@ extern struct log blecent_log;
 #define BLECENT_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
 
 /* Convenience macro for logging to the blecent module. */
-#define BLECENT_LOG(lvl, ...) \
-    LOG_ ## lvl(&blecent_log, BLECENT_LOG_MODULE, __VA_ARGS__)
+//#define BLECENT_LOG(lvl, ...) LOG_ ## lvl(&blecent_log, BLECENT_LOG_MODULE, __VA_ARGS__)
+#define BLECENT_LOG(lvl, ...) LOG_INFO(&blecent_log, BLECENT_LOG_MODULE, __VA_ARGS__)
+
 
 #define BLECENT_SVC_IMMEDIATE_ALERT_UUID     0x1802
 #define BLECENT_CHR_ALERT_LEVEL              0x2a06
