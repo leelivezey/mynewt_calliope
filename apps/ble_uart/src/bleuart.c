@@ -34,8 +34,13 @@ uint16_t g_bleuart_attr_read_handle;
 /* ble uart attr write handle */
 uint16_t g_bleuart_attr_write_handle;
 
-/* Pointer to a console buffer */
-char *console_buf;
+char cmd_buf[32];
+
+static struct os_event ble_cmd_event = {
+        .ev_cb = NULL, // has to be set by application using set_ble_cmd_cb()
+        .ev_arg = cmd_buf
+};
+
 
 uint16_t g_console_conn_handle;
 /**
@@ -101,10 +106,10 @@ gatt_svr_chr_access_uart_write(uint16_t conn_handle, uint16_t attr_handle,
     switch (ctxt->op) {
         case BLE_GATT_ACCESS_OP_WRITE_CHR:
               while(om) {
-                  shell_cmd_write((char *)om->om_data, om->om_len);
+                  strncpy(cmd_buf, (const char*)om->om_data, om->om_len);
+                  os_eventq_put(os_eventq_dflt_get(), &ble_cmd_event);
                   om = SLIST_NEXT(om, om_next);
               }
-              shell_cmd_write("\n", 1);
               return 0;
         default:
             assert(0);
@@ -137,6 +142,7 @@ err:
     return rc;
 }
 
+#if 0
 /**
  * Reads console and sends data over BLE
  */
@@ -170,6 +176,7 @@ bleuart_uart_read(void)
         break;
     }
 }
+#endif
 
 /**
  * Sets the global connection handle
@@ -181,22 +188,7 @@ bleuart_set_conn_handle(uint16_t conn_handle) {
     g_console_conn_handle = conn_handle;
 }
 
-/**
- * BLEuart console initialization
- *
- * @param Maximum input
- */
-void
-bleuart_init(void)
-{
-    int rc;
 
-    /* Ensure this function only gets called by sysinit. */
-//    SYSINIT_ASSERT_ACTIVE();
-
-    rc = console_init(bleuart_uart_read);
-    SYSINIT_PANIC_ASSERT(rc == 0);
-
-    console_buf = malloc(MYNEWT_VAL(BLEUART_MAX_INPUT));
-    SYSINIT_PANIC_ASSERT(console_buf != NULL);
+void set_ble_cmd_cb(os_event_fn *ev_cb) {
+    ble_cmd_event.ev_cb = ev_cb;
 }

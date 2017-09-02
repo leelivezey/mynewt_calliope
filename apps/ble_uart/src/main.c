@@ -30,6 +30,8 @@
 #include "hal/hal_system.h"
 #include "config/config.h"
 #include "split/split.h"
+#include <sound/sound_pwm.h>
+#include <microbit_matrix/microbit_matrix.h>
 
 /* BLE */
 #include "nimble/ble.h"
@@ -39,14 +41,36 @@
 
 extern void sound_command_init();
 
-#define INFO WARN
-/* Application-specified header. */
-#include "bleprph.h"
-
 /** Log data. */
 struct log bleprph_log;
 
 static int bleuart_gap_event(struct ble_gap_event *event, void *arg);
+
+/**
+  * This function will be called when the gpio_irq_handle_event is pulled
+  * from the message queue.
+  */
+static void FUNCTION_IS_NOT_USED
+ble_cmd_callback(struct os_event *ev)
+{
+    int freq;
+    char ch;
+    console_printf(ev->ev_arg);
+    if(sscanf(ev->ev_arg, "s%d", &freq) == 1) {
+        if (freq == 0) {
+            sound_off();
+        } else {
+            sound_on((uint16_t) freq);
+        }
+    } else if(sscanf(ev->ev_arg, "c%c", &ch) == 1) {
+        print_char(ch, FALSE);
+    } else if(sscanf(ev->ev_arg, "b%c", &ch) == 1) {
+        print_char(ch, TRUE);
+    } else if(strlen(ev->ev_arg) > 1 && *((char*)ev->ev_arg) == ' '){ // leerzeichen am Anfang
+        print_string(ev->ev_arg+1, TRUE);
+    }
+}
+
 
 /**
  * Logs information about a connection to the console.
@@ -218,7 +242,6 @@ bleprph_on_reset(int reason)
 static void
 bleprph_on_sync(void)
 {
-    /* Begin advertising. */
     bleprph_advertise();
 }
 
@@ -233,8 +256,6 @@ bleprph_on_sync(void)
 int
 main(void)
 {
-    int rc;
-
     /* Initialize OS */
     sysinit();
 
@@ -249,31 +270,20 @@ main(void)
     log_register("ble_hs", &ble_hs_log, &log_console_handler, NULL,
                  LOG_SYSLEVEL);
 
+
     ble_hs_cfg.reset_cb = bleprph_on_reset;
     ble_hs_cfg.sync_cb = bleprph_on_sync;
-//    ble_hs_cfg.gatts_register_cb = gatt_svr_register_cb;
 
-    bleuart_init();
-    rc = bleuart_gatt_svr_init();
+    set_ble_cmd_cb(ble_cmd_callback);
+    int rc = bleuart_gatt_svr_init();
     assert(rc == 0);
 
     /* Set the default device name. */
     rc = ble_svc_gap_device_name_set("ble_uart");
     assert(rc == 0);
+
     conf_load();
     sound_command_init();
-    /* If this app is acting as the loader in a split image setup, jump into
-     * the second stage application instead of starting the OS.
-     */
-#if MYNEWT_VAL(SPLIT_LOADER)
-    {
-        void *entry;
-        rc = split_app_go(&entry, true);
-        if (rc == 0) {
-            hal_system_start(entry);
-        }
-    }
-#endif
 
     /*
      * As the last thing, process events from default event queue.

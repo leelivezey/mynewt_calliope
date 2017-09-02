@@ -18,16 +18,10 @@
 
 # Package: apps/bleprph
 
-syscfg.defs:
-    BLEUART_MAX_INPUT:
-        description: >
-            The size of the largest line that can be received over the UART
-            service.
-        value: 120
 
 syscfg.vals:
     # Use INFO log level to reduce code size.  DEBUG is too large for nRF51.
-    LOG_LEVEL: 2
+    LOG_LEVEL: 100
     LOG_CLI: 1
 
     # Disable central and observer roles.

@@ -20,20 +20,34 @@
 #ifndef _BLEUART_H_
 #define _BLEUART_H_
 
+#include "log/log.h"
+#include "nimble/ble.h"
+#include "host/ble_uuid.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void
-bleuart_init(void);
-int
-bleuart_svc_register(void);
-int
-bleuart_gatt_svr_init(void);
-void
-bleuart_set_conn_handle(uint16_t conn_handle);
+extern struct log bleprph_log;
+
+/* bleprph uses the first "peruser" log module. */
+#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+
+/* Convenience macro for logging to the bleprph module. */
+#define BLEPRPH_LOG(lvl, ...) \
+    LOG_WARN(&bleprph_log, BLEPRPH_LOG_MODULE, __VA_ARGS__)
+
+void set_ble_cmd_cb(os_event_fn *ev_cb);
+
+int bleuart_svc_register(void);
+int bleuart_gatt_svr_init(void);
+void bleuart_set_conn_handle(uint16_t conn_handle);
 
 extern const ble_uuid128_t gatt_svr_svc_uart_uuid;
+
+/** Misc. */
+void print_bytes(const uint8_t *bytes, int len);
+void print_addr(const void *addr);
 
 #ifdef __cplusplus
 }
