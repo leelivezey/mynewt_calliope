@@ -109,6 +109,7 @@ gatt_svr_chr_access_uart_write(uint16_t conn_handle, uint16_t attr_handle,
         case BLE_GATT_ACCESS_OP_WRITE_CHR:
             while (om) {
                 strncpy(cmd_buf, (const char *) om->om_data, om->om_len);
+                cmd_buf[om->om_len] = 0;
                 os_eventq_put(os_eventq_dflt_get(), &ble_cmd_event);
                 om = SLIST_NEXT(om, om_next);
             }
