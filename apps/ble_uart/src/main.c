@@ -34,6 +34,22 @@
 #include <microbit_matrix/microbit_matrix.h>
 #include <ws2812b/ws2812b.h>
 #include <hal/hal_i2c.h>
+#include "id/id.h"
+
+#define STAMP_STR(s) STAMP_STR1(s)
+#define STAMP_STR1(str) #str
+
+#ifdef BSP_NAME
+static const char *bsp_str = STAMP_STR(BSP_NAME);
+static const char *app_str = STAMP_STR(APP_NAME);
+#else
+static const char *bsp_str = "";
+static const char *app_str = "";
+#endif
+
+static int info_ix = 0;
+#define MAX_INFO_IX  2
+
 #define I2C_BUS 0
 
 /* BLE */
@@ -71,7 +87,7 @@ send_register_and_value(uint8_t i2c_address, uint8_t reg, uint8_t value){
 static void FUNCTION_IS_NOT_USED
 ble_cmd_callback(struct os_event *ev)
 {
-    char buf[40] = "ok\n";
+    char buf[60] = "ok\n";
     int rc;
     int freq;
     char ch;
@@ -88,20 +104,80 @@ ble_cmd_callback(struct os_event *ev)
         }
     } else if(sscanf(ev->ev_arg, "c%c", &ch) == 1) {
         print_char(ch, FALSE);
+
     } else if(sscanf(ev->ev_arg, "b%c", &ch) == 1) {
         print_char(ch, TRUE);
-    } else if(sscanf(ev->ev_arg, "l%02x %02x %02x", &v1, &v2, &v3) == 3) {
+
+    } else if(sscanf(ev->ev_arg, "l%02x%02x%02x", &v1, &v2, &v3) == 3) {
         rgb_set((uint8_t) v1, (uint8_t) v2, (uint8_t) v3);  // r g b
-    } else if(sscanf(ev->ev_arg, "i%02x %02x %02x", &i2c_address, &v2, &v3 ) == 3) {
+
+    } else if(sscanf(ev->ev_arg, "i%02x%02x", &i2c_address, &v2 ) == 2) {
+//        rc = send_register_and_value((uint8_t)i2c_address, (uint8_t)v2, (uint8_t)v3);
+//        sprintf(buf, "rc=%d\n", rc);
+        strcpy(buf, "not yet implemented:\n");
+
+    } else if(sscanf(ev->ev_arg, "i%02x%02x%02x", &i2c_address, &v2, &v3 ) == 3) {
         rc = send_register_and_value((uint8_t)i2c_address, (uint8_t)v2, (uint8_t)v3);
         sprintf(buf, "rc=%d\n", rc);
+
     } else if(sscanf(ev->ev_arg, "i%02x", &i2c_address) == 1) {
         rc = hal_i2c_master_probe(I2C_BUS, (uint8_t)i2c_address, OS_TICKS_PER_SEC);
         sprintf(buf, "rc=%d\n", rc);
+
     } else if(strlen(ev->ev_arg) > 1 && *((char*)ev->ev_arg) == ' '){ // leerzeichen am Anfang
         print_string(ev->ev_arg+1, TRUE);
-    } else if(strlen(ev->ev_arg) == 1){
-        strcpy(buf, "app:\n");
+
+    } else if(strlen(ev->ev_arg) <= 1){
+        switch(info_ix){
+            case 0:
+                strcpy(buf, "app: ");
+                strcat(buf, app_str);
+                strcat(buf, "\n");
+                info_ix++;
+                break;
+            case 1:
+                strcpy(buf, "bsp:");
+                strcat(buf, bsp_str);
+                strcat(buf, "\n");
+                info_ix++;
+                break;
+            case 2:
+                strcpy(buf, "Kommandos:\n");
+                info_ix++;
+                break;
+            case 3:
+                strcpy(buf, "c<char> -> LED-Matrix\n");
+                info_ix++;
+                break;
+            case 4:
+                strcpy(buf, "b<char> -> blink LED-Matrix\n");
+                info_ix++;
+                break;
+            case 5:
+                strcpy(buf, "s<freq> -> sound\n");
+                info_ix++;
+                break;
+            case 6:
+                strcpy(buf, "<leerzeichen><text> -> Laufschrift\n");
+                info_ix++;
+                break;
+            case 7:
+                strcpy(buf, "i<adr> -> probe i2c adr\n");
+                info_ix++;
+                break;
+            case 8:
+                strcpy(buf, "i<adr><reg> -> read reg of i2c-adr\n");
+                info_ix++;
+                break;
+            case 9:
+                strcpy(buf, "i<adr><reg><val> -> write val into reg of i2c-adr\n");
+                info_ix++;
+                break;
+            case 10:
+                strcpy(buf, "9 Kommandos\n");
+                info_ix = 0;
+                break;
+        }
     } else {
         strcpy(buf, "???\n");
     }
