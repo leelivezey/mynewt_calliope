@@ -68,3 +68,5 @@ syscfg.vals:
 
     CONSOLE_COMPAT: 1
     SOUND_ENABLED: 1
+
+    I2C_0: 1

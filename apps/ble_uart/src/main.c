@@ -32,6 +32,9 @@
 #include "split/split.h"
 #include <sound/sound_pwm.h>
 #include <microbit_matrix/microbit_matrix.h>
+#include <ws2812b/ws2812b.h>
+#include <hal/hal_i2c.h>
+#define I2C_BUS 0
 
 /* BLE */
 #include "nimble/ble.h"
@@ -40,22 +43,43 @@
 #include "bleuart.h"
 
 extern void sound_command_init();
+static struct hal_i2c_master_data i2c_data;
 
 /** Log data. */
 struct log bleprph_log;
 
 static int bleuart_gap_event(struct ble_gap_event *event, void *arg);
 
+static int
+send_register_and_value(uint8_t i2c_address, uint8_t reg, uint8_t value){
+    int rc;
+    uint8_t command_bytes[2];
+    command_bytes[0] = reg;
+    command_bytes[1] = value;
+    i2c_data.address = i2c_address;
+    i2c_data.buffer = command_bytes;
+    i2c_data.len = 2;
+    rc = hal_i2c_master_write(I2C_BUS, &i2c_data, OS_TICKS_PER_SEC, true);
+    return rc;
+}
+
 /**
+ *
   * This function will be called when the gpio_irq_handle_event is pulled
   * from the message queue.
   */
 static void FUNCTION_IS_NOT_USED
 ble_cmd_callback(struct os_event *ev)
 {
+    char buf[40] = "ok\n";
+    int rc;
     int freq;
     char ch;
     console_printf(ev->ev_arg);
+    int v1;
+    int v2;
+    int v3;
+    int i2c_address;
     if(sscanf(ev->ev_arg, "s%d", &freq) == 1) {
         if (freq == 0) {
             sound_off();
@@ -66,11 +90,23 @@ ble_cmd_callback(struct os_event *ev)
         print_char(ch, FALSE);
     } else if(sscanf(ev->ev_arg, "b%c", &ch) == 1) {
         print_char(ch, TRUE);
+    } else if(sscanf(ev->ev_arg, "l%02x %02x %02x", &v1, &v2, &v3) == 3) {
+        rgb_set((uint8_t) v1, (uint8_t) v2, (uint8_t) v3);  // r g b
+    } else if(sscanf(ev->ev_arg, "i%02x %02x %02x", &i2c_address, &v2, &v3 ) == 3) {
+        rc = send_register_and_value((uint8_t)i2c_address, (uint8_t)v2, (uint8_t)v3);
+        sprintf(buf, "rc=%d\n", rc);
+    } else if(sscanf(ev->ev_arg, "i%02x", &i2c_address) == 1) {
+        rc = hal_i2c_master_probe(I2C_BUS, (uint8_t)i2c_address, OS_TICKS_PER_SEC);
+        sprintf(buf, "rc=%d\n", rc);
     } else if(strlen(ev->ev_arg) > 1 && *((char*)ev->ev_arg) == ' '){ // leerzeichen am Anfang
         print_string(ev->ev_arg+1, TRUE);
+    } else if(strlen(ev->ev_arg) == 1){
+        strcpy(buf, "app:\n");
+    } else {
+        strcpy(buf, "???\n");
     }
+    bleuart_uart_send_notification(buf);
 }
-
 
 /**
  * Logs information about a connection to the console.
@@ -284,6 +320,7 @@ main(void)
 
     conf_load();
     sound_command_init();
+    ws2812_init();
 
     /*
      * As the last thing, process events from default event queue.

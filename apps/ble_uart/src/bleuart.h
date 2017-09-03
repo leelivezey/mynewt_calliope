@@ -42,6 +42,7 @@ void set_ble_cmd_cb(os_event_fn *ev_cb);
 int bleuart_svc_register(void);
 int bleuart_gatt_svr_init(void);
 void bleuart_set_conn_handle(uint16_t conn_handle);
+void bleuart_uart_send_notification(char *buf) ;
 
 extern const ble_uuid128_t gatt_svr_svc_uart_uuid;
 
