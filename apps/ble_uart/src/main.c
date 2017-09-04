@@ -47,8 +47,6 @@ static const char *bsp_str = "";
 static const char *app_str = "";
 #endif
 
-static int info_ix = 0;
-#define MAX_INFO_IX  2
 
 #define I2C_BUS 0
 
@@ -59,7 +57,12 @@ static int info_ix = 0;
 #include "bleuart.h"
 
 extern void sound_command_init();
+
 static struct hal_i2c_master_data i2c_data;
+
+static int info_ix = 0;
+#define MAX_INFO_IX  2
+char buf[60] = "ok\n";
 
 /** Log data. */
 struct log bleprph_log;
@@ -67,7 +70,7 @@ struct log bleprph_log;
 static int bleuart_gap_event(struct ble_gap_event *event, void *arg);
 
 static int
-send_register_and_value(uint8_t i2c_address, uint8_t reg, uint8_t value){
+send_register_and_value(uint8_t i2c_address, uint8_t reg, uint8_t value) {
     int rc;
     uint8_t command_bytes[2];
     command_bytes[0] = reg;
@@ -79,15 +82,68 @@ send_register_and_value(uint8_t i2c_address, uint8_t reg, uint8_t value){
     return rc;
 }
 
+
+/* ADC */
+#include <adc/adc.h>
+#include "adc_nrf51_driver/adc_nrf51_driver.h"
+
+struct adc_dev *adc;
+static int adc_pro_sec = 0;
+static int adc_sec = 0;
+
+static struct os_callout timer_callout;
+
+static void adc_timer_ev_cb(struct os_event *ev) {
+    assert(ev != NULL);
+    adc_sample(adc);
+    if(adc_pro_sec > 0) {
+        os_callout_reset(&timer_callout, (adc_sec * OS_TICKS_PER_SEC) / adc_pro_sec);
+    }
+}
+
+static void init_adc_timer(void) {
+    os_callout_init(&timer_callout, os_eventq_dflt_get(),
+                    adc_timer_ev_cb, NULL);
+}
+
+static void start_adc_timer(void) {
+        os_callout_reset(&timer_callout, (adc_sec * OS_TICKS_PER_SEC) / adc_pro_sec);
+}
+
+
+int
+adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
+               void *buffer, int buffer_len) {
+    int value;
+    int rc = -1;
+
+    value = adc_nrf51_driver_read(buffer, buffer_len);
+    if (value >= 0) {
+        sprintf(buf, "%d\n", value);
+        bleuart_uart_send_notification(buf);
+//        console_printf("adc %d\n", value);
+    } else {
+        console_printf("Error while reading: %d\n", value);
+    }
+    return (rc);
+}
+
+static int
+adc_init() {
+    init_adc_timer();
+    adc = adc_nrf51_driver_get();
+    int rc = adc_event_handler_set(adc, adc_read_event, (void *) NULL);
+    return rc;
+}
+
+
 /**
  *
   * This function will be called when the gpio_irq_handle_event is pulled
   * from the message queue.
   */
 static void FUNCTION_IS_NOT_USED
-ble_cmd_callback(struct os_event *ev)
-{
-    char buf[60] = "ok\n";
+ble_cmd_callback(struct os_event *ev) {
     int rc;
     int freq;
     char ch;
@@ -96,39 +152,61 @@ ble_cmd_callback(struct os_event *ev)
     int v2;
     int v3;
     int i2c_address;
-    if(sscanf(ev->ev_arg, "s%d", &freq) == 1) {
+
+    strcpy(buf, "OK\n");
+    if (sscanf(ev->ev_arg, "s%d", &freq) == 1) {
         if (freq == 0) {
             sound_off();
         } else {
             sound_on((uint16_t) freq);
         }
-    } else if(sscanf(ev->ev_arg, "c%c", &ch) == 1) {
+    } else if (sscanf(ev->ev_arg, "c%c", &ch) == 1) {
         print_char(ch, FALSE);
 
-    } else if(sscanf(ev->ev_arg, "b%c", &ch) == 1) {
+    } else if (sscanf(ev->ev_arg, "b%c", &ch) == 1) {
         print_char(ch, TRUE);
 
-    } else if(sscanf(ev->ev_arg, "l%02x%02x%02x", &v1, &v2, &v3) == 3) {
+    } else if (sscanf(ev->ev_arg, "l%02x%02x%02x", &v1, &v2, &v3) == 3) {
         rgb_set((uint8_t) v1, (uint8_t) v2, (uint8_t) v3);  // r g b
 
-    } else if(sscanf(ev->ev_arg, "i%02x%02x", &i2c_address, &v2 ) == 2) {
+    } else if (sscanf(ev->ev_arg, "i%02x%02x", &i2c_address, &v2) == 2) {
 //        rc = send_register_and_value((uint8_t)i2c_address, (uint8_t)v2, (uint8_t)v3);
 //        sprintf(buf, "rc=%d\n", rc);
         strcpy(buf, "not yet implemented:\n");
 
-    } else if(sscanf(ev->ev_arg, "i%02x%02x%02x", &i2c_address, &v2, &v3 ) == 3) {
-        rc = send_register_and_value((uint8_t)i2c_address, (uint8_t)v2, (uint8_t)v3);
+    } else if (sscanf(ev->ev_arg, "i%02x%02x%02x", &i2c_address, &v2, &v3) == 3) {
+        rc = send_register_and_value((uint8_t) i2c_address, (uint8_t) v2, (uint8_t) v3);
         sprintf(buf, "rc=%d\n", rc);
 
-    } else if(sscanf(ev->ev_arg, "i%02x", &i2c_address) == 1) {
-        rc = hal_i2c_master_probe(I2C_BUS, (uint8_t)i2c_address, OS_TICKS_PER_SEC);
+    } else if (sscanf(ev->ev_arg, "i%02x", &i2c_address) == 1) {
+        rc = hal_i2c_master_probe(I2C_BUS, (uint8_t) i2c_address, OS_TICKS_PER_SEC);
         sprintf(buf, "rc=%d\n", rc);
 
-    } else if(strlen(ev->ev_arg) > 1 && *((char*)ev->ev_arg) == ' '){ // leerzeichen am Anfang
-        print_string(ev->ev_arg+1, TRUE);
+    } else if (sscanf(ev->ev_arg, "a%d", &v1) == 1) {
+        adc_pro_sec = v1;
+        adc_sec = 1;
+        if (v1 == 0) {
+            sprintf(buf, "adc aus\n");
+        } else {
+            sprintf(buf, "adc %d Messungen pro sec\n", adc_pro_sec);
+            start_adc_timer();
+        }
 
-    } else if(strlen(ev->ev_arg) <= 1){
-        switch(info_ix){
+    } else if (sscanf(ev->ev_arg, "A%d", &v1) == 1) {
+        adc_sec = v1;
+        adc_pro_sec = 1;
+        if (v1 == 0) {
+            sprintf(buf, "adc aus\n");
+        } else {
+            sprintf(buf, "adc Messungen alle %d sec\n", adc_sec);
+            start_adc_timer();
+        }
+
+    } else if (strlen(ev->ev_arg) > 1 && *((char *) ev->ev_arg) == ' ') { // leerzeichen am Anfang
+        print_string(ev->ev_arg + 1, TRUE);
+
+    } else if (strlen(ev->ev_arg) <= 1) {
+        switch (info_ix) {
             case 0:
                 strcpy(buf, "app: ");
                 strcat(buf, app_str);
@@ -174,7 +252,15 @@ ble_cmd_callback(struct os_event *ev)
                 info_ix++;
                 break;
             case 10:
-                strcpy(buf, "9 Kommandos\n");
+                strcpy(buf, "a<n> -> adc n Messungen pro sec\n");
+                info_ix++;
+                break;
+            case 11:
+                strcpy(buf, "A<n> -> adc Messung alle n sec\n");
+                info_ix++;
+                break;
+            case 12:
+                strcpy(buf, "11 Kommandos\n");
                 info_ix = 0;
                 break;
         }
@@ -188,8 +274,7 @@ ble_cmd_callback(struct os_event *ev)
  * Logs information about a connection to the console.
  */
 static void
-print_conn_desc(struct ble_gap_conn_desc *desc)
-{
+print_conn_desc(struct ble_gap_conn_desc *desc) {
     BLEPRPH_LOG(INFO, "handle=%d our_ota_addr_type=%d our_ota_addr=",
                 desc->conn_handle, desc->our_ota_addr.type);
     print_addr(desc->our_ota_addr.val);
@@ -203,7 +288,7 @@ print_conn_desc(struct ble_gap_conn_desc *desc)
                 desc->peer_id_addr.type);
     print_addr(desc->peer_id_addr.val);
     BLEPRPH_LOG(INFO, " conn_itvl=%d conn_latency=%d supervision_timeout=%d "
-                "encrypted=%d authenticated=%d bonded=%d\n",
+            "encrypted=%d authenticated=%d bonded=%d\n",
                 desc->conn_itvl, desc->conn_latency,
                 desc->supervision_timeout,
                 desc->sec_state.encrypted,
@@ -217,8 +302,7 @@ print_conn_desc(struct ble_gap_conn_desc *desc)
  *     o Undirected connectable mode.
  */
 static void
-bleprph_advertise(void)
-{
+bleprph_advertise(void) {
     struct ble_gap_adv_params adv_params;
     struct ble_hs_adv_fields fields;
     int rc;
@@ -248,7 +332,7 @@ bleprph_advertise(void)
     fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
     fields.uuids128 = BLE_UUID128(&gatt_svr_svc_uart_uuid.u);
-    print_bytes((const uint8_t *)fields.uuids128, 16);
+    print_bytes((const uint8_t *) fields.uuids128, 16);
     fields.num_uuids128 = 1;
     fields.uuids128_is_complete = 1;
 
@@ -258,8 +342,8 @@ bleprph_advertise(void)
     }
 
     memset(&fields, 0, sizeof fields);
-    fields.name = (uint8_t *)ble_svc_gap_device_name();
-    fields.name_len = strlen((char *)fields.name);
+    fields.name = (uint8_t *) ble_svc_gap_device_name();
+    fields.name_len = strlen((char *) fields.name);
     fields.name_is_complete = 1;
 
     rc = ble_gap_adv_rsp_set_fields(&fields);
@@ -295,16 +379,15 @@ bleprph_advertise(void)
  *                                  particular GAP event being signalled.
  */
 static int
-bleuart_gap_event(struct ble_gap_event *event, void *arg)
-{
+bleuart_gap_event(struct ble_gap_event *event, void *arg) {
     struct ble_gap_conn_desc desc;
     int rc;
 
     switch (event->type) {
         case BLE_GAP_EVENT_CONNECT:
-            BLEPRPH_LOG(INFO, "connection %s; status=%d ",
-                        event->connect.status == 0 ? "established" : "failed",
-                        event->connect.status);
+        BLEPRPH_LOG(INFO, "connection %s; status=%d ",
+                    event->connect.status == 0 ? "established" : "failed",
+                    event->connect.status);
 
             /* A new connection was established or a connection attempt failed. */
             if (event->connect.status == 0) {
@@ -346,14 +429,12 @@ bleuart_gap_event(struct ble_gap_event *event, void *arg)
 }
 
 static void
-bleprph_on_reset(int reason)
-{
+bleprph_on_reset(int reason) {
     BLEPRPH_LOG(ERROR, "Resetting state; reason=%d\n", reason);
 }
 
 static void
-bleprph_on_sync(void)
-{
+bleprph_on_sync(void) {
     bleprph_advertise();
 }
 
@@ -366,13 +447,12 @@ bleprph_on_sync(void)
  * @return int NOTE: this function should never return!
  */
 int
-main(void)
-{
+main(void) {
     /* Initialize OS */
     sysinit();
 
     /* Set initial BLE device address. */
-    memcpy(g_dev_addr, (uint8_t[6]){0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b}, 6);
+    memcpy(g_dev_addr, (uint8_t[6]) {0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b}, 6);
 
     /* Initialize the bleprph log. */
     log_register("bleprph", &bleprph_log, &log_console_handler, NULL,
@@ -397,7 +477,7 @@ main(void)
     conf_load();
     sound_command_init();
     ws2812_init();
-
+    adc_init();
     /*
      * As the last thing, process events from default event queue.
      */
