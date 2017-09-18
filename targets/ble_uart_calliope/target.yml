@@ -1,4 +1,4 @@
 ### Target: targets/mydrivertest_calliope
-target.app: "@mynewt-de-schilken-calliope/apps/ble_uart"
+target.app: "@schilken-mynewt-calliope/apps/ble_uart"
 target.bsp: "@apache-mynewt-core/hw/bsp/calliope_mini"
 target.build_profile: "optimized"
