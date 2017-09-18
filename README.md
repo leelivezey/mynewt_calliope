@@ -8,9 +8,9 @@ Experimental apache mynewt bsp, drivers and apps for calliope mini: button, oled
 
 project.repositories:
     - apache-mynewt-core
-    - mynewt-de-schilken-calliope
+    - schilken-mynewt-calliope
 
-repository.mynewt-de-schilken-calliope:
+repository.schilken-mynewt-calliope:
     type: github
     vers: 0-latest
     user: schilken
@@ -34,13 +34,19 @@ Calliope mini is for german pupils what the BBC microbit is in England.
 It is widely compatible with the microbit but has an RGB LED, a buzzer, a microphone and a motor driver chip on board.
 
 
-### There are two apps
+### There are the following apps:
 * apps/mydrivertest which uses the mynewt shell to issue commands to the drivers
 * apps/bleadc which uses adc to read an analog value and publish it as bluetooth characteristic
+* apps/ble_uart provide simple command shell via bluetooth
+* apps/ibeacon configurable ibeacon and eddystone beacon
+* apps/blecent make a MI band vibrate
+* apps/ancs -- WIP - not yet working
 
-### There are also two targets
+### There are also the targets for these apps and for a bootloader
 * target/mydrivertest_calliope
 * target/bleadc_calliope
+* target/bootloader
+...
 
 ```
 newt target create mydrivertest_calliope
