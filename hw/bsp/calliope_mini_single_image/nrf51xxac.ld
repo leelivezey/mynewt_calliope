@@ -22,9 +22,9 @@
  */
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00004000, LENGTH = 0x32000
+  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x37000
   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 0x4000
 }
 
 /* This linker script is used for images and thus contains an image header */
-_imghdr_size = 0x20;
+_imghdr_size = 0x00;
