@@ -226,6 +226,24 @@ void showIntAs5Digits(uint16_t value){
     init_timer_and_gpio();
 }
 
+void showInt_0_25(uint8_t value){
+    clearPixels();
+    _blink = false;
+    if(value > 25) {
+      value = 25;
+      _blink = true;
+    };
+    for (int nn = 0; nn < value; nn++) {
+        uint8_t row = nn / 5;
+        uint8_t col = nn % 5;
+        visible_row[4-col] |= (0x20 << (4-row));
+    }
+    _blink_phase_on = true;
+    _scroll = FALSE;
+    init_timer_and_gpio();
+}
+
+
 int set_pixel_at_xy(uint8_t x, uint8_t y){
     visible_row[y] |= (0x200 >> x);
     return 0;

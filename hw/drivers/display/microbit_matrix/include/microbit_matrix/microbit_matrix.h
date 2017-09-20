@@ -40,6 +40,7 @@ extern int print_char(char ch, boolean blink);
 extern int set_pixel_at_xy(uint8_t x, uint8_t y);
 extern bool isScrolling();
 extern void showIntAs5Digits(uint16_t value);
+extern void showInt_0_25(uint8_t value);
 
 #define GPIO_OF_ROW_0 (13) // muss HIGH sein. 3 bits
 #define GPIO_OF_COL_0 (4)  // muss LOW sein, damit LED leuchtet, 9 bits
