@@ -37,6 +37,12 @@
 #include <adc/adc.h>
 #include "adc_nrf51_driver/adc_nrf51_driver.h"
 
+#define SIZE_OF_VALUES  32
+uint16_t values[SIZE_OF_VALUES];
+uint8_t  value_ix = 0;
+
+int samples_total = 0;
+
 struct adc_dev *adc;
 static int adc_pro_sec = 8;
 static int adc_sec = 1;
@@ -60,6 +66,19 @@ static void start_adc_timer(void) {
         os_callout_reset(&timer_callout, (adc_sec * OS_TICKS_PER_SEC) / adc_pro_sec);
 }
 
+static uint16_t
+calc_new_average(uint16_t value){
+    values[value_ix++] = value;
+    uint16_t sum_of_values = 0;
+    if(value_ix >= SIZE_OF_VALUES){
+        value_ix = 0;
+    }
+    for(int ix=0; ix < SIZE_OF_VALUES; ix++){
+        sum_of_values += values[ix];
+    }
+    return sum_of_values/SIZE_OF_VALUES;
+}
+
 int
 adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
                void *buffer, int buffer_len) {
@@ -68,8 +87,16 @@ adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
 
     value = adc_nrf51_driver_read(buffer, buffer_len);
     if (value >= 0) {
-        console_printf("%d\n", value);
-        showInt_0_25((uint8_t )((25*value)/3000));
+        value = value / 3;
+        uint16_t new_average = calc_new_average((uint16_t)value);
+        uint8_t diff = (new_average - value) + 12;
+//        console_printf("%d %d %d\n", value, (int)new_average, (int)diff);
+        if(samples_total++ > SIZE_OF_VALUES ) {
+            console_printf("%d\n", (int)diff);
+            showInt_0_25((uint8_t )diff);
+        } else {
+            showInt_0_25((uint8_t )26); // blink
+        }
 /*        uint16_t frequenz = 2000 - value;
         if(frequenz > 20) {
             sound_on(frequenz);
