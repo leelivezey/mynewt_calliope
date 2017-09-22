@@ -47,6 +47,13 @@ struct adc_dev *adc;
 static int adc_pro_sec = 8;
 static int adc_sec = 1;
 
+#define NUMBER_OF_CALIBRATION_SAMPLES  500
+
+static bool calibrating = false;
+static int calibration_sample_counter;
+static int calibration_sum = 0;
+static uint16_t calibration_average = 0;
+
 static struct os_callout timer_callout;
 
 static void adc_timer_ev_cb(struct os_event *ev) {
@@ -66,6 +73,7 @@ static void start_adc_timer(void) {
         os_callout_reset(&timer_callout, (adc_sec * OS_TICKS_PER_SEC) / adc_pro_sec);
 }
 
+/*
 static uint16_t
 calc_new_average(uint16_t value){
     values[value_ix++] = value;
@@ -78,6 +86,22 @@ calc_new_average(uint16_t value){
     }
     return sum_of_values/SIZE_OF_VALUES;
 }
+*/
+
+static void
+start_calibrate() {
+    calibrating = true;
+    adc_pro_sec = 25;
+}
+
+static void
+stop_calibrate() {
+    calibrating = false;
+    calibration_average = calibration_sum/calibration_sample_counter;
+    console_printf("avg%d\n", (int)calibration_average);
+    adc_pro_sec = 3;
+}
+
 
 int
 adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
@@ -88,15 +112,19 @@ adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
     value = adc_nrf51_driver_read(buffer, buffer_len);
     if (value >= 0) {
         value = value / 3;
-        uint16_t new_average = calc_new_average((uint16_t)value);
-        uint8_t diff = (new_average - value) + 12;
-//        console_printf("%d %d %d\n", value, (int)new_average, (int)diff);
-        if(samples_total++ > SIZE_OF_VALUES ) {
-            console_printf("%d\n", (int)diff);
-            showInt_0_25((uint8_t )diff);
-        } else {
-            showInt_0_25((uint8_t )26); // blink
+        if(calibrating) {
+            calibration_sum += value;
+            showInt_0_25((uint8_t) calibration_sample_counter % 25);
+            if(calibration_sample_counter >= NUMBER_OF_CALIBRATION_SAMPLES){
+                stop_calibrate();
+            }
+            calibration_sample_counter++;
+            return 0;
         }
+        uint8_t diff = (calibration_average - value) + 12;
+//        console_printf("%d %d %d\n", value, (int)new_average, (int)diff);
+        console_printf("%d\n", (int)diff);
+        showInt_0_25((uint8_t )diff);
 /*        uint16_t frequenz = 2000 - value;
         if(frequenz > 20) {
             sound_on(frequenz);
@@ -134,6 +162,7 @@ main(void) {
     ws2812_init();
     adc_init();
     init_adc_timer();
+    start_calibrate();
     start_adc_timer();
     /*
      * As the last thing, process events from default event queue.
