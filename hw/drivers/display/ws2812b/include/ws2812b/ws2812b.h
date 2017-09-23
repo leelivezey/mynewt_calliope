@@ -54,11 +54,11 @@ typedef union {
 			NRF_GPIO->OUTCLR = (1UL << WS2812B_LED_PIN); \
 
 
-#define WS2812B_SEND_ZERO NRF_GPIO->OUTSET = (1UL << WS2812B_LED_PIN); \
+#define WS2812B_SEND_ZERO 	NRF_GPIO->OUTSET = (1UL << WS2812B_LED_PIN); \
 			__ASM (  \
 					" NOP\n\t"  \
 				);  \
-			NRF_GPIO->OUTCLR = (1UL << WS2812B_LED_PIN);  \
+			NRF_GPIO->OUTCLR = (1UL << WS2812B_LED_PIN); \
 			__ASM ( \
 					" NOP\n\t" \
 					" NOP\n\t" \
@@ -69,5 +69,25 @@ typedef union {
 					" NOP\n\t" \
 					" NOP\n\t" \
 				);
+
+#define WS2812B_SEND_ZERO_NO_IRQ   						 sr = __get_PRIMASK(); \
+        							  				    __disable_irq();      \
+			NRF_GPIO->OUTSET = (1UL << WS2812B_LED_PIN); \
+			__ASM (  \
+					" NOP\n\t"  \
+				);  \
+			NRF_GPIO->OUTCLR = (1UL << WS2812B_LED_PIN); \
+															if (!sr) { __enable_irq(); } \
+			__ASM ( \
+					" NOP\n\t" \
+					" NOP\n\t" \
+					" NOP\n\t" \
+					" NOP\n\t" \
+					" NOP\n\t" \
+					" NOP\n\t" \
+					" NOP\n\t" \
+					" NOP\n\t" \
+				);
+
 
 #endif //MYPROJ_WS2812B_H

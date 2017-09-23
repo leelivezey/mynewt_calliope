@@ -67,31 +67,32 @@ nrf51_delay_us(uint32_t number_of_us)
 
 
 void rgb_send() {
+    int sr=0; // used in WS2812B_SEND_ZERO for __disable_irq()
     nrf51_delay_us(50);
     for (int j = 0; j < 3; j++) {
         if (_grb.asArray[j] & 0b10000000) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
 
         if (_grb.asArray[j] & 0b01000000) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
 
         if (_grb.asArray[j] & 0b00100000) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
 
         if (_grb.asArray[j] & 0b00010000) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
 
         if (_grb.asArray[j] & 0b00001000) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
 
         if (_grb.asArray[j] & 0b00000100) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
 
         if (_grb.asArray[j] & 0b00000010) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
 
         if (_grb.asArray[j] & 0b00000001) { WS2812B_SEND_ONE }
-        else { WS2812B_SEND_ZERO }
+        else { WS2812B_SEND_ZERO_NO_IRQ }
     }
 }
 

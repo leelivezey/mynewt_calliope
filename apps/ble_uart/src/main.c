@@ -168,7 +168,7 @@ ble_cmd_callback(struct os_event *ev) {
 
     } else if (sscanf(ev->ev_arg, "l%02x%02x%02x", &v1, &v2, &v3) == 3) {
         rgb_set((uint8_t) v1, (uint8_t) v2, (uint8_t) v3);  // r g b
-
+        rgb_send();
     } else if (sscanf(ev->ev_arg, "i%02x%02x", &i2c_address, &v2) == 2) {
 //        rc = send_register_and_value((uint8_t)i2c_address, (uint8_t)v2, (uint8_t)v3);
 //        sprintf(buf, "rc=%d\n", rc);
@@ -260,7 +260,11 @@ ble_cmd_callback(struct os_event *ev) {
                 info_ix++;
                 break;
             case 12:
-                strcpy(buf, "11 Kommandos\n");
+                strcpy(buf, "lrrggbb< -> Farbe der LED setzen\n");
+                info_ix++;
+                break;
+            case 13:
+                strcpy(buf, "12 Kommandos\n");
                 info_ix = 0;
                 break;
         }
