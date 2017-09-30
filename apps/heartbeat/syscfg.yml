@@ -1,0 +1,21 @@
+
+syscfg.vals:
+    # Enable the shell task.
+    SHELL_TASK: 1
+    # Enable Console OS Ticks
+    CONSOLE_TICKS: 1
+    # Enable Console Prompt
+    CONSOLE_PROMPT: 1 
+
+    # Enable shell commands.
+    STATS_CLI: 1
+    LOG_CLI: 1
+    CONFIG_CLI: 1
+    IMGMGR_CLI: 1
+
+    BUTTON_A_ENABLED: 1
+    BUTTON_B_ENABLED: 1
+
+    SOUND_ENABLED: 1
+
+    SHELL_MAX_MODULES: 5

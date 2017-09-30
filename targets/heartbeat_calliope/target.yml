@@ -1,0 +1,4 @@
+### Target: targets/mydrivertest_calliope
+target.app: "@schilken-mynewt-calliope/apps/heartbeat"
+target.bsp: "@apache-mynewt-core/hw/bsp/calliope_mini"
+target.build_profile: "debug"
