@@ -41,8 +41,14 @@ static struct os_callout blinky_callout;
 
 static char ch = ' ';
 static bool running = false;
+
+#define POLLING_VERSION  1
+
+#if POLLING_VERSION
+#else
 static int new_irq_millisec = 3;
 static int last_irq_millisec;
+#endif
 
 #define SAMPLES_DELAY    3
 #define GROVE_A1_P1      26
@@ -74,15 +80,17 @@ timer_ev_cb(struct os_event *ev) {
     int32_t ticks = 1;
     if (running) {
         ticks = SAMPLES_DELAY;
-//        buffer[0] = hal_gpio_read(GROVE_A1_P1) ? '1' : '0';
-//        console_write(buffer, sizeof(buffer));
+#if POLLING_VERSION
+        buffer[0] = hal_gpio_read(GROVE_A1_P1) ? '1' : '0';
+        console_write(buffer, sizeof(buffer));
+#else
         if(new_irq_millisec != last_irq_millisec) {
             buffer[0] = '1';
- //           console_printf("%d\n", new_irq_millisec);
             last_irq_millisec = new_irq_millisec;
         } else {
             buffer[0] = '0';
         }
+#endif
         console_write(buffer, sizeof(buffer));
     } else {
         hal_gpio_toggle(g_led_pin);
@@ -96,11 +104,12 @@ static void init_timer(void) {
     os_callout_reset(&blinky_callout, OS_TICKS_PER_SEC);
 }
 
-
+#if POLLING_VERSION
+#else
 void interruptHandler(void *unused) {
     new_irq_millisec = os_get_uptime_usec() / 1000;
 }
-
+#endif
 
 /**
  * main
@@ -113,7 +122,7 @@ void interruptHandler(void *unused) {
 int
 main(int argc, char **argv)
 {
-    int rc;
+int rc = 0;
 #ifdef ARCH_sim
     mcu_sim_parse_args(argc, argv);
 #endif
@@ -121,12 +130,14 @@ main(int argc, char **argv)
     g_led_pin = LED_COL2;
     hal_gpio_init_out(LED_ROW1, 1);
     hal_gpio_init_out(g_led_pin, 0);
+#if POLLING_VERSION
     hal_gpio_init_in(GROVE_A1_P1, HAL_GPIO_PULL_DOWN);
-
+#else
     rc = hal_gpio_irq_init(GROVE_A1_P1, interruptHandler, NULL,
                            HAL_GPIO_TRIG_RISING, HAL_GPIO_PULL_DOWN);
     hal_gpio_irq_enable(GROVE_A1_P1);
     assert(rc == 0);
+#endif
     buffer[1] = '\n';
     init_timer();
 
