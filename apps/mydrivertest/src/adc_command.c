@@ -21,7 +21,6 @@ static int adc_poll_cmd(int argc, char **argv);
 #include "adc_nrf51_driver/adc_nrf51_driver.h"
 
 #include <led_bar/led_bar.h>
-#include <sound/sound_pwm.h>
 
 // /* ADC Task settings */
 #define ADC_TASK_PRIO           5
@@ -31,6 +30,7 @@ bssnz_t os_stack_t adc_stack[ADC_STACK_SIZE];
 
 static int adc_loop = 0;
 static int previous_value = -1;
+static bool adc_initialized = false;
 
 int
 adc_handle_event(struct adc_dev *dev, void *arg, uint8_t etype,
@@ -42,12 +42,12 @@ adc_handle_event(struct adc_dev *dev, void *arg, uint8_t etype,
     if (value >= 0) {
         showIntAs5Digits(value);
         if (!isScrolling()) {
-            if(adc_loop && (previous_value != value)){
+            if(previous_value != value){
                 uint8_t bar_level = (uint8_t)(value/33);
                 uint16_t f = (uint16_t)(30 + value/2);
                 led_bar_init();
                 led_bar_set_level(bar_level);
-                sound_on((uint16_t)f);
+//                sound_on((uint16_t)f);
                 console_printf("%4d L:%d f:%d, ", value, (int)bar_level, (int)f);
             }
         }
@@ -69,7 +69,9 @@ adc_task_handler(void *unused)
     assert(rc == 0);
 
     while (1) {
-        adc_sample(adc);
+        if(adc_loop) {
+            adc_sample(adc);
+        }
         /* Wait 1/10 second */
         os_time_delay(OS_TICKS_PER_SEC / 20);
     }
@@ -130,9 +132,6 @@ adc_commands_init(void)
 {
     int rc = shell_register(ADC_MODULE, adc_module_commands);
     assert(rc == 0);
-    os_task_init(&adc_task, "adc", adc_task_handler,
-                 NULL, ADC_TASK_PRIO, OS_WAIT_FOREVER,
-                 adc_stack, ADC_STACK_SIZE);
 }
 
 
@@ -156,6 +155,12 @@ adc_loop_cmd(int argc, char **argv) {
         }
     }
     adc_loop = onOff;
+    if(!adc_initialized && adc_loop){
+        os_task_init(&adc_task, "adc", adc_task_handler,
+                     NULL, ADC_TASK_PRIO, OS_WAIT_FOREVER,
+                     adc_stack, ADC_STACK_SIZE);
+        adc_initialized = true;
+    }
     console_printf("adc: loop %s\n", onOff == 1 ? "ON" : "OFF");
     return 0;
 }

@@ -209,7 +209,7 @@ gpio_write_cmd(int argc, char **argv) {
     int gpio_pin=-1;
     char* pin;
     if (argc != 3) {
-        console_printf("usage: gpio w <pin> <onOff>, <pin>: p0..p30, onOff: 0 oder 1\n");
+        console_printf("usage: w <pin> <onOff>, <pin>: p0..p30, onOff: 0 oder 1\n");
         return 1;
     }
     pin = argv[1];
@@ -218,6 +218,7 @@ gpio_write_cmd(int argc, char **argv) {
         return 1;
     }
 #ifdef BBC_MICROBIT
+    int pin_nr = -1;
     if (sscanf(pin, "P%d", &pin_nr) == 1) {
         if(pin_nr < 0 || pin_nr > 20) {
             console_printf("Board-PIN: 0 bis 20\n");
@@ -232,7 +233,7 @@ gpio_write_cmd(int argc, char **argv) {
             return 1;
         }
 #ifdef BBC_MICROBIT
-        int pin_nr = getPinFromGpioPin((int8_t)gpio_pin);
+        pin_nr = getPinFromGpioPin((int8_t)gpio_pin);
 #endif
     }
     if (sscanf( argv[2], "%d", &onOff) != 1) {
@@ -246,6 +247,6 @@ gpio_write_cmd(int argc, char **argv) {
 #else
     console_printf("gpio: p%d %s\n", gpio_pin, onOff == 0 ? "LOW" : "HIGH");
 #endif
-//    hal_gpio_init_out(gpio_pin, onOff);
+    hal_gpio_init_out(gpio_pin, onOff);
     return 0;
 }

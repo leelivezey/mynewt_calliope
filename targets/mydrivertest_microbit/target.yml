@@ -1,0 +1,4 @@
+### Target: targets/mydrivertest_calliope
+target.app: "@schilken-mynewt-calliope/apps/mydrivertest"
+target.bsp: "@schilken-mynewt-microbit/hw/bsp/bbc_microbit"
+target.build_profile: "debug"

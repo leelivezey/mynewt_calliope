@@ -41,11 +41,14 @@ pkg.deps:
     - "@schilken-mynewt-calliope/hw/drivers/sensors/si1145_i2c"
     - "@schilken-mynewt-calliope/hw/drivers/display/ws2812b"
     - "@schilken-mynewt-calliope/hw/drivers/buttons"
-    - "@schilken-mynewt-calliope/hw/drivers/sound"
     - "@mynewt-nrf51-adc-driver/libs/adc_nrf51_driver"
     - "@schilken-mynewt-calliope/hw/drivers/display/microbit_matrix"
     - "@schilken-mynewt-calliope/hw/drivers/display/led_bar"
     - "@schilken-mynewt-calliope/hw/drivers/display/matrix_15x7"
+
+pkg.deps.SOUND_ENABLED:
+    - "@schilken-mynewt-calliope/hw/drivers/sound"
+    
 
 
 

@@ -87,7 +87,7 @@ static void initOled() {
   * This function will be called when the gpio_irq_handle_event is pulled
   * from the message queue.
   */
-static void FUNCTION_IS_NOT_USED
+static void  // FUNCTION_IS_NOT_USED
 button_callback(struct os_event *ev)
 {
     if((int)ev->ev_arg == BUTTON_A_PIN) {
@@ -153,13 +153,14 @@ main(int argc, char **argv)
     matrix_command_init();
     rgb_command_init();
     adc_commands_init();
+#if MYNEWT_VAL(SOUND_ENABLED)
     sound_command_init();
+#endif
     ledbar_command_init();
     m7x15_command_init();
-//    shell_register_default_module("");
     initOled();
-    printAtXY(1, 1, "UV+OLED v0.7");
-    printAtXY(1, 4, "Button B fuer  neue Messung");
+    printAtXY(1, 1, "mydrivertest v0.7");
+    printAtXY(1, 4, "Button A oder B");
 
 #if MYNEWT_VAL(BUTTON_LOG)
     log_register("button", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);

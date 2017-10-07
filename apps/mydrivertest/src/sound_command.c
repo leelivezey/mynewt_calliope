@@ -2,11 +2,16 @@
 // Created by Alfred Schilken on 18.07.17.
 //
 
+
 #include "syscfg/syscfg.h"
+
+#if MYNEWT_VAL(SOUND_ENABLED)
+
 #include <shell/shell.h>
 #include <stdio.h>
 #include <console/console.h>
 #include <assert.h>
+
 #include <sound/sound_pwm.h>
 
 static int sound_shell_func(int argc, char **argv);
@@ -15,6 +20,7 @@ static struct shell_cmd sound_cmd = {
         .sc_cmd = "sound",
         .sc_cmd_func = sound_shell_func,
 };
+
 
 void sound_command_init(void) {
     int rc;
@@ -51,3 +57,5 @@ static int sound_shell_func(int argc, char **argv) {
     }
     return 1;
 }
+#endif
+
