@@ -385,7 +385,7 @@ main(void)
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
     /* Initialize data structures to track connected peers. */
-    rc = peer_init(MYNEWT_VAL(BLE_MAX_CONNECTIONS), 7, 32, 7);
+    rc = peer_init(MYNEWT_VAL(BLE_MAX_CONNECTIONS), 7, 32, 1);
     assert(rc == 0);
 
     /* Set the default device name. */
