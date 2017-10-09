@@ -44,13 +44,13 @@ uint8_t  value_ix = 0;
 int samples_total = 0;
 
 struct adc_dev *adc;
-static int adc_pro_sec = 8;
+static int adc_pro_sec = 32;
 static int adc_sec = 1;
 
-#define NUMBER_OF_CALIBRATION_SAMPLES  500
+#define NUMBER_OF_CALIBRATION_SAMPLES  25
 
 static bool calibrating = false;
-static int calibration_sample_counter;
+static int calibration_sample_counter = 0;
 static int calibration_sum = 0;
 static uint16_t calibration_average = 0;
 
@@ -91,7 +91,6 @@ calc_new_average(uint16_t value){
 static void
 start_calibrate() {
     calibrating = true;
-    adc_pro_sec = 25;
 }
 
 static void
@@ -99,30 +98,38 @@ stop_calibrate() {
     calibrating = false;
     calibration_average = calibration_sum/calibration_sample_counter;
     console_printf("avg%d\n", (int)calibration_average);
-    adc_pro_sec = 3;
 }
 
+void
+print_bytes(const uint8_t *bytes, int len)
+{
+    int i;
+
+    for (i = 0; i < len; i++) {
+        console_printf("%s0x%02x", i != 0 ? ":" : "", bytes[i]);
+    }
+    console_printf("\n");
+}
 
 int
 adc_read_event(struct adc_dev *dev, void *arg, uint8_t etype,
                void *buffer, int buffer_len) {
     int value;
     int rc = -1;
-
     value = adc_nrf51_driver_read(buffer, buffer_len);
     if (value >= 0) {
         value = value / 3;
+//        console_printf("v%d\n", (int)value);
         if(calibrating) {
             calibration_sum += value;
+            calibration_sample_counter++;
             showInt_0_25((uint8_t) calibration_sample_counter % 25);
             if(calibration_sample_counter >= NUMBER_OF_CALIBRATION_SAMPLES){
                 stop_calibrate();
             }
-            calibration_sample_counter++;
             return 0;
         }
         uint8_t diff = (calibration_average - value) + 12;
-//        console_printf("%d %d %d\n", value, (int)new_average, (int)diff);
         console_printf("%d\n", (int)diff);
         showInt_0_25((uint8_t )diff);
 /*        uint16_t frequenz = 2000 - value;

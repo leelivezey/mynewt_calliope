@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,27 +17,30 @@
 # under the License.
 #
 
-# Package: apps/bleprph
+# Package: libs/adc_nrf51_driver
 
-
-syscfg.vals:
-    # Use INFO log level to reduce code size.  DEBUG is too large for nRF51.
-    LOG_LEVEL: 100
-    LOG_CLI: 1
-
-    # OS main/default task
-    OS_MAIN_STACK_SIZE: 256  # was 1024
-
-    SHELL_TASK: 1
-    STATS_CLI: 0
-    STATS_NAMES: 0
-
-    ADC_0_SCALING: NRF_ADC_CONFIG_SCALING_INPUT_ONE_THIRD
-    ADC_0_INPUT: NRF_ADC_CONFIG_INPUT_0  #  p0.26  ->  Grove B Pin 1
-    ADC_0_SAMPLES: 16
-
-    SHELL_CMD_HELP: 0
- 
-    CONSOLE_COMPAT: 1
-    CONSOLE_TICKS: 0
-    SOUND_ENABLED: 1
+syscfg.defs:
+    ADC_0:
+        description: 'TBD'
+        value:  1
+    ADC_0_SAMPLES:
+        description: 'TBD'
+        value: 2
+    ADC_0_INTERRUPT_PRIORITY:
+        description: 'TBD'
+        value: 'ADC_CONFIG_IRQ_PRIORITY'
+    ADC_0_RESOLUTION:
+        description: 'TBD'
+        value: 'NRF_ADC_CONFIG_RES_10BIT'
+    ADC_0_SCALING:
+        description: 'TBD'
+        value: 'NRF_ADC_CONFIG_SCALING_INPUT_FULL_SCALE'
+    ADC_0_REFERENCE:
+        description: 'TBD'
+        value: 'NRF_ADC_CONFIG_REF_VBG'
+    ADC_0_INPUT:
+        description: 'TBD'
+        value: 'NRF_ADC_CONFIG_INPUT_DISABLED'
+    ADC_0_EXTERNAL_REFERENCE:
+        description: 'TBD'
+        value: 'ADC_CONFIG_EXTREFSEL_None'
