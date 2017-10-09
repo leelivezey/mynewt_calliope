@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-pkg.name: apps/blecent
+pkg.name: apps/blemib
 pkg.type: app
 pkg.description: Simple BLE central application.
 pkg.author: "Apache Mynewt <dev@mynewt.apache.org>"

@@ -389,7 +389,7 @@ main(void)
     assert(rc == 0);
 
     /* Set the default device name. */
-    rc = ble_svc_gap_device_name_set("nimble-blecent");
+    rc = ble_svc_gap_device_name_set("blemib");
     assert(rc == 0);
 
     /* os start should never return. If it does, this should be an error */
