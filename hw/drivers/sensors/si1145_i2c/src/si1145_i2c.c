@@ -39,7 +39,7 @@ struct hal_i2c_master_data i2c_data;
 int i2c_write_byte(uint8_t byte, bool last_op) {
     int rc;
     uint8_t command_bytes[1];
-    command_bytes[1] = byte;
+    command_bytes[0] = byte;
     i2c_data.address = _i2c_address;
     i2c_data.buffer = command_bytes;
     i2c_data.len = 1;
