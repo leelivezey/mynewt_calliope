@@ -141,8 +141,12 @@ ble_app_advertise(void) {
     uint8_t uuid128[16];
     int rc;
 
+    uint8_t jaalee_uuid128[] = {
+            0xEB, 0xEF, 0xD0, 0x83, 0x70, 0xA2, 0x47, 0xC8, 0x98, 0x37, 0xE7, 0xB5, 0x63, 0x4D, 0xF5, 0x24
+    };
+    memcpy(uuid128, jaalee_uuid128, sizeof uuid128);
     /* Arbitrarily set the UUID to a string of 0x11 bytes. */
-    memset(uuid128, 0x11, sizeof uuid128);
+//    memset(uuid128, 0x11, sizeof uuid128);
 
     if (strlen(eddystone_full_url) > 0) {
         uint8_t eddystone_url_scheme;
