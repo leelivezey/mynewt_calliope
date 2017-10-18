@@ -1,5 +1,5 @@
 ### Package: targets/ibeacon_calliope
-pkg.name: "targets/ibeacon_calliope"
+pkg.name: "targets/ibeacon_calliope_2_11"
 pkg.type: "target"
 pkg.description: 
 pkg.author: Alfred Schilken
