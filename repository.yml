@@ -15,10 +15,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
+# master 
 
 repo.name: mynewt-calliope
 repo.versions:
     "0.0.0": "master"
-
     "0-latest": "0.0.0"
+    "v_1_2": "v_1_2"
