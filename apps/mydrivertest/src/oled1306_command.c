@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include "os/os.h"
 #include <hal/hal_i2c.h>
+
+#if MYNEWT_VAL(OLED_I2C_ENABLED)
 #include <ssd1306_i2c/ssd1306_i2c.h>
 
 static int oled_shell_func(int argc, char **argv);
@@ -97,5 +99,7 @@ static int oled_shell_func(int argc, char **argv) {
      */
     return 0;
 }
+
+#endif
 
 

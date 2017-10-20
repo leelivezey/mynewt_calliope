@@ -7,6 +7,7 @@
 #include "syscfg/syscfg.h"
 #include <assert.h>
 #include <stdio.h>
+#if MYNEWT_VAL(SI1145_ENABLED)
 #include <si1145_i2c/si1145_i2c.h>
 
 static int uv_shell_func(int argc, char **argv);
@@ -53,5 +54,5 @@ static int uv_shell_func(int argc, char **argv) {
     return 0;
 }
 
-
+#endif
 
