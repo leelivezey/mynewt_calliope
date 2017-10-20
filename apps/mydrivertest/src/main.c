@@ -26,8 +26,14 @@
 #include "bsp/bsp.h"
 #include "hal/hal_gpio.h"
 #include <microbit_matrix/microbit_matrix.h>
+#if MYNEWT_VAL(SI1145_ENABLED)
 #include <si1145_i2c/si1145_i2c.h>
+#endif
+
+#if MYNEWT_VAL(OLED_I2C_ENABLED)
 #include <ssd1306_i2c/ssd1306_i2c.h>
+#endif
+
 #include <buttons/button_polling.h>
 
 #if MYNEWT_VAL(MATRIX_15X7_ENABLED)
@@ -45,7 +51,9 @@ int g_led_pin;
 extern void gpio_commands_init(void);
 extern void i2c_command_init(void);
 extern void i2c_commands_init(void);
+#if MYNEWT_VAL(OLED_I2C_ENABLED)
 extern void oled_command_init(void);
+#endif
 extern void uv_command_init(void);
 extern void matrix_command_init(void);
 extern void rgb_command_init(void);
@@ -58,7 +66,6 @@ static struct os_callout blinky_callout;
 
 static char ch = ' ';
 
-static bool oled_initilized = false;
 
 
 #if MYNEWT_VAL(SI1145_ENABLED)
@@ -72,6 +79,11 @@ readAndPrintUV() {
 }
 #endif
 
+
+#if MYNEWT_VAL(OLED_I2C_ENABLED)
+
+static bool oled_initilized = false;
+
 static void initOled() {
     int rc = -1;
     if (!oled_initilized) {
@@ -82,6 +94,7 @@ static void initOled() {
         }
     }
 }
+#endif
 
 /**
   * This function will be called when the gpio_irq_handle_event is pulled
@@ -140,6 +153,7 @@ main(int argc, char **argv)
 #ifdef ARCH_sim
     mcu_sim_parse_args(argc, argv);
 #endif
+    os_time_delay(OS_TICKS_PER_SEC);
     sysinit();
     g_led_pin = LED_COL2;
     hal_gpio_init_out(LED_ROW1, 1);
@@ -148,8 +162,9 @@ main(int argc, char **argv)
     gpio_commands_init();
     i2c_command_init();
     i2c_commands_init();
-    oled_command_init();
+#if MYNEWT_VAL(SI1145_ENABLED)
     uv_command_init();
+#endif
     matrix_command_init();
     rgb_command_init();
     adc_commands_init();
@@ -158,9 +173,12 @@ main(int argc, char **argv)
 #endif
     ledbar_command_init();
     m7x15_command_init();
+#if MYNEWT_VAL(OLED_I2C_ENABLED)
+    oled_command_init();
     initOled();
     printAtXY(1, 1, "mydrivertest v0.7");
     printAtXY(1, 4, "Button A oder B");
+#endif
 
 #if MYNEWT_VAL(BUTTON_LOG)
     log_register("button", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);

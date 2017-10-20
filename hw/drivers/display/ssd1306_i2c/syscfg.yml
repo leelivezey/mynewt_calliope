@@ -19,6 +19,9 @@
 
 syscfg.defs:
 
+    OLED_I2C_ENABLED:
+        description: 'enable OLED'
+        value: 0
 #    SSD1306_I2C_BUS:
 #        description: 'I2C bus number for the SSD1306_I2C'
 #        value: -1
