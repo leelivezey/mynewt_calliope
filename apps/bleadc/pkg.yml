@@ -42,4 +42,4 @@ pkg.deps:
     - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/sys/sysinit"
     - "@apache-mynewt-core/sys/id"
-    - "@mynewt-nrf51-adc-driver/libs/adc_nrf51_driver"
+    - "@schilken-mynewt-calliope/libs/adc_nrf51_driver"

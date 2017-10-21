@@ -44,4 +44,4 @@ pkg.deps:
     - "@schilken-mynewt-calliope/hw/drivers/sound"
     - "@schilken-mynewt-calliope/hw/drivers/display/microbit_matrix"
     - "@schilken-mynewt-calliope/hw/drivers/display/ws2812b"
-    - "@mynewt-nrf51-adc-driver/libs/adc_nrf51_driver"
+    - "@schilken-mynewt-calliope/libs/adc_nrf51_driver"
