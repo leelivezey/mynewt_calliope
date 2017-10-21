@@ -9,12 +9,23 @@ Experimental apache mynewt bsp, drivers and apps for calliope mini: button, oled
 project.repositories:
     - apache-mynewt-core
     - schilken-mynewt-calliope
+    - mynewt_nordic
 
+repository.apache-mynewt-core:
+    type: github
+    vers: 1.2.0
+    user: apache
+    repo: mynewt-core
 repository.schilken-mynewt-calliope:
     type: github
-    vers: 0-latest
+    vers: 1.2-latest
     user: schilken
     repo: mynewt-calliope
+repository.mynewt_nordic:
+    type: github
+    vers: 1-latest
+    user: runtimeco
+    repo: mynewt_nordic
 ```
 
 NOTE:
@@ -39,7 +50,9 @@ It is widely compatible with the microbit but has an RGB LED, a buzzer, a microp
 * apps/bleadc which uses adc to read an analog value and publish it as bluetooth characteristic
 * apps/ble_uart provide simple command shell via bluetooth
 * apps/ibeacon configurable ibeacon and eddystone beacon
-* apps/blecent make a MI band vibrate
+* apps/blemib make a MI band vibrate
+* apps/bleadc example of adc as gatt service
+* apps/stresstest  kind of lie detector
 * apps/ancs -- WIP - not yet working
 
 ### There are also the targets for these apps and for a bootloader
@@ -64,7 +77,7 @@ newt run mydrivertest_calliope 0.7.7
 ### Connect a terminal to the usb-uart ( I use CoolTerm on m mac :-)
 
 Try out the commands:
-* enter ? to see the commands
+* enter help to see the commands
 * write string to calliope 5x5 LED matrix
 * write character to calliope 5x5 LED matrix
 * react on button press with writing to LEDs
