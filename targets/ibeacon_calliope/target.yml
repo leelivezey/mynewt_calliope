@@ -1,4 +1,4 @@
 ### Target: targets/mydrivertest_calliope
 target.app: "@schilken-mynewt-calliope/apps/ibeacon"
 target.bsp: "@apache-mynewt-core/hw/bsp/calliope_mini"
-target.build_profile: "debug"
+target.build_profile: "optimized"
